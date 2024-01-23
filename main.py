@@ -41,6 +41,14 @@ def index():
 def table():
     return render_template("table.html")
 
+@app.route('/form/')  # connects /stub/ URL to stub() function
+def form():
+    return render_template("login.html")
+
+@app.route('/display/')
+def display():
+    return render_template("displayusers.html")
+
 @app.before_request
 def before_request():
     # Check if the request came from a specific origin

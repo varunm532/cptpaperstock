@@ -1,4 +1,3 @@
-""" database dependencies to support sqliteDB examples """
 from random import randrange
 from datetime import date
 import os, base64
