@@ -41,9 +41,11 @@ def index():
 def table():
     return render_template("table.html")
 
-@app.route('/form/')  # connects /stub/ URL to stub() function
-def form():
-    return render_template("login.html")
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    # Define your site variable here
+    site = {'baseurl': 'http://localhost:8086'}
+    return render_template('login.html', site=site)
 
 @app.route('/display/')
 def display():

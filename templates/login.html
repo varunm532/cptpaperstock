@@ -3,83 +3,71 @@
 
 <h2>Add User</h2>
 
-<form id="addUserForm">
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required><br>
-
-    <label for="uid">User ID:</label>
-    <input type="text" id="uid" name="uid" required><br>
-
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required><br>
-
-    <label for="dob">Date of Birth (MM-DD-YYYY):</label>
-    <input type="text" id="dob" name="dob"><br>
-
-    <button type="button" onclick="addUser()">Add User</button>
+<form action="javascript:login_user()">
+    <p><label>
+        User ID:
+        <input type="text" name="userid" id="userid" required>
+    </label></p>
+    <p><label>
+        Name:
+        <input type="text" name="name" id="name" required>
+    </label></p>
+    <p><label>
+        Password:
+        <input type="password" name="password" id="password" required>
+    </label></p>
+    <p><label>
+        Date of Birth:
+        <input type="date" name="dob" id="dob" required>
+    </label></p>
+    <p>
+        <button>Login</button>
+    </p>
 </form>
-
-<script>
-    function authenticateUser() {
-        var credentials = {
-            uid: 'your_user_id',
-            password: 'your_password'
-        };
-
-        fetch('/api/users/authenticate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(credentials)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.token) {
-                // Successfully authenticated, now add user with the obtained token
-                addUser(data.token);
-            } else {
-                console.error('Authentication failed:', data.message);
-                alert('Authentication failed. Please check the console for details.');
-            }
-        })
-        .catch(error => {
-            console.error('Error authenticating user:', error);
-            alert('Error authenticating user. Please check the console for details.');
-        });
-    }
-
-    function addUser(token) {
-        var formData = {
-            name: document.getElementById('name').value,
-            uid: document.getElementById('uid').value,
-            password: document.getElementById('password').value,
-            dob: document.getElementById('dob').value
-        };
-
-        fetch('/api/users/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token  // Include the obtained token in the headers
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert('User added successfully!');
-            // You can redirect or perform any other action here after successful user addition
-        })
-        .catch(error => {
-            console.error('Error adding user:', error);
-            alert('Error adding user. Please check the console for details.');
-        });
-    }
-
-    // Call authenticateUser() to start the process
-    authenticateUser();
-</script>
-
-
 </body>
+<script type="module" src="{% raw %}{{site.baseurl}}{% endraw %}/assets/js/api/config.js"></script>
+
+<script type="module">
+    function login_user(){
+        // Set Authenticate endpoint
+        let uri = 'http://localhost:8086';
+        const url = uri + '/api/users/authenticate';
+
+        // Set body of request to include login data from DOM
+        const body = {
+            userid: document.getElementById("userid").value,
+            name: document.getElementById("name").value,
+            password: document.getElementById("password").value,
+            dob: document.getElementById("dob").value,
+        };
+        // Change options according to Authentication requirements
+        const authOptions = {
+            ...options, // This will copy all properties from options
+            method: 'POST', // Override the method property
+            cache: 'no-cache', // Set the cache property
+            body: JSON.stringify(body)
+        };
+
+        // Fetch JWT
+        fetch(url, authOptions)
+        .then(response => {
+            // handle error response from Web API
+            if (!response.ok) {
+                const errorMsg = 'Login error: ' + response.status;
+                console.log(errorMsg);
+                return;
+            }
+            // Success!!!
+            // Redirect to the database page
+            window.location.href = "{{site.baseurl}}/data/database";
+        })
+        // catch fetch errors (ie ACCESS to server blocked)
+        .catch(err => {
+            console.error(err);
+        });
+    }
+
+    // Attach login_user to the window object, allowing access to form action
+    window.login_user = login_user;
+</script>
 </html>

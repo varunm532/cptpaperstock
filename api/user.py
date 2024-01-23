@@ -33,7 +33,7 @@ class UserAPI:
             dob = body.get('dob')
 
             ''' #1: Key code block, setup USER OBJECT '''
-            uo = User(name=name, 
+            uo = User(name=name,
                       uid=uid)
             
             ''' Additional garbage error checking '''
@@ -101,10 +101,8 @@ class UserAPI:
                                 )
                         return resp
                     except Exception as e:
-                        return {
-                            "error": "Something went wrong",
-                            "message": str(e)
-                        }, 500
+                        current_app.logger.error('Error during authentication: %s', e)
+                        return {'message': 'Internal server error'}, 500
                 return {
                     "message": "Error fetching auth token!",
                     "data": None,
