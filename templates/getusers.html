@@ -1,0 +1,71 @@
+<html>
+    <body>
+        <h2>Get Users</h2>
+        <div id="users"></div>
+        <script>
+            const authurl = '/api/users/authenticate';
+            const url = '/api/users/';
+
+            const uid = 'admin';
+            const password = 'admin';
+            // send post request to authurl with a authenticated uid and password
+
+            function authenticate() {
+                var data = {
+                    uid: uid,
+                    password: password
+                };
+
+                var json = JSON.stringify(data);
+
+                fetch(authurl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: json
+                })
+                .then(response => {
+                    // Check if the response is valid JSON
+                    if (response.headers.get('content-type').includes('application/json')) {
+                        return response.json();
+                    } else {
+                        throw new Error('Received non-JSON response');
+                    }
+                })
+                .then(data => {
+                    console.log('Success:', data);
+
+                    // Store the token as a cookie
+                    document.cookie = `token=${data.token}; path=/`;
+
+                    // get users
+                    fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + data.token
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Success:', data);
+                        var users = document.getElementById('users');
+                        if(users) {
+                            users.innerHTML = JSON.stringify(data);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            }
+        </script>
+        <script>
+            window.onload = authenticate;
+        </script>
+    </body>
+</html>

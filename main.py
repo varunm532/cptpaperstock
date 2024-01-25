@@ -41,15 +41,20 @@ def index():
 def table():
     return render_template("table.html")
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def login():
     # Define your site variable here
     site = {'baseurl': 'http://localhost:8086'}
     return render_template('login.html', site=site)
 
-@app.route('/display/')
+@app.route('/display/', methods=['GET'])
 def display():
-    return render_template("displayusers.html")
+    site = {'baseurl': 'http://localhost:8086'}
+    return render_template('getusers.html', site=site)
+
+# @app.route('/display/')
+# def display():
+#     return render_template("displayusers.html")
 
 @app.before_request
 def before_request():
