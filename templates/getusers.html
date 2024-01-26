@@ -1,71 +1,78 @@
 <html>
     <body>
-        <h2>Get Users</h2>
-        <div id="users"></div>
-        <script>
-            const authurl = '/api/users/authenticate';
-            const url = '/api/users/';
+        <table>
+            <thead>
+            <tr>
+              <th>Name</th>
+              <th>ID</th>
+              <th>Age</th>
+            </tr>
+            </thead>
+            <tbody id="result">
+            </tbody>
+        </table>
 
-            const uid = 'admin';
-            const password = 'admin';
-            // send post request to authurl with a authenticated uid and password
+        <script type="module", src="/static/js/api/config.js"></script>
+        <script type="module">
+            import { uri } from '/static/js/api/config.js';
+            // Set Users endpoint (list of users)
+            const url = uri + '/api/users/';
+          
+            // prepare HTML result container for new output
+            const resultContainer = document.getElementById("result");
+            const header = new Headers();
+            header.append("Cookie", "jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfdWlkIjoidG9ieSJ9.k8yO84FQ_L3RY-MhpTWzFgIHJUcRnROtNm2En0SpKcA");
 
-            function authenticate() {
-                var data = {
-                    uid: uid,
-                    password: password
-                };
-
-                var json = JSON.stringify(data);
-
-                fetch(authurl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: json
-                })
-                .then(response => {
-                    // Check if the response is valid JSON
-                    if (response.headers.get('content-type').includes('application/json')) {
-                        return response.json();
-                    } else {
-                        throw new Error('Received non-JSON response');
+            const requestOptions = {
+              method: 'GET',
+              headers: header,
+              redirect: 'follow'
+            };
+            fetch(url, requestOptions)
+              // response is a RESTful "promise" on any successful fetch
+              .then(response => {
+                // check for response errors and display
+                if (response.status !== 200) {
+                    const errorMsg = 'Database response error: ' + response.status;
+                    console.log(errorMsg);
+                    const tr = document.createElement("tr");
+                    const td = document.createElement("td");
+                    td.innerHTML = errorMsg;
+                    tr.appendChild(td);
+                    resultContainer.appendChild(tr);
+                    return;
+                }
+                // valid response will contain JSON data
+                response.json().then(data => {
+                    console.log(data);
+                    for (const row of data) {
+                      // tr and td build out for each row
+                      const tr = document.createElement("tr");
+                      const name = document.createElement("td");
+                      const id = document.createElement("td");
+                      const age = document.createElement("td");
+                      // data is specific to the API
+                      name.innerHTML = row.name; 
+                      id.innerHTML = row.uid; 
+                      age.innerHTML = row.age; 
+                      // this builds td's into tr
+                      tr.appendChild(name);
+                      tr.appendChild(id);
+                      tr.appendChild(age);
+                      // append the row to table
+                      resultContainer.appendChild(tr);
                     }
                 })
-                .then(data => {
-                    console.log('Success:', data);
-
-                    // Store the token as a cookie
-                    document.cookie = `token=${data.token}; path=/`;
-
-                    // get users
-                    fetch(url, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + data.token
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Success:', data);
-                        var users = document.getElementById('users');
-                        if(users) {
-                            users.innerHTML = JSON.stringify(data);
-                        }
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                    });
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                });
-            }
-        </script>
-        <script>
-            window.onload = authenticate;
-        </script>
+            })
+            // catch fetch errors (ie ACCESS to server blocked)
+            .catch(err => {
+              console.error(err);
+              const tr = document.createElement("tr");
+              const td = document.createElement("td");
+              td.innerHTML = err + ": " + url;
+              tr.appendChild(td);
+              resultContainer.appendChild(tr);
+            });
+          </script>
     </body>
 </html>

@@ -28,8 +28,9 @@
                 userListHTML += '<li>';
                 userListHTML += '<strong>Name:</strong> ' + user.name + '<br>';
                 userListHTML += '<strong>User ID:</strong> ' + user.uid + '<br>';
-                userListHTML += '<strong>Date of Birth:</strong> ' + user.dob + '<br>';
-                userListHTML += '<strong>Age:</strong> ' + user.age + '<br>';
+                // userListHTML += '<strong>Date of Birth:</strong> ' + user.dob + '<br>';
+                // userListHTML += '<strong>Age:</strong> ' + user.age + '<br>';
+                userListHTML += '<strong>Password:</strong> ' + user.password + '<br>';
                 userListHTML += '<strong>Posts:</strong> <ul>';
                 user.posts.forEach(post => {
                     userListHTML += '<li>' + post.note + '</li>';

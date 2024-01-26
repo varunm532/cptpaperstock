@@ -47,6 +47,12 @@ def login():
     site = {'baseurl': 'http://localhost:8086'}
     return render_template('login.html', site=site)
 
+@app.route('/signin', methods=['GET', 'POST'])
+def signin():
+    # Define your site variable here
+    site = {'baseurl': 'http://localhost:8086'}
+    return render_template('signin.html', site=site)
+
 @app.route('/display/', methods=['GET'])
 def display():
     site = {'baseurl': 'http://localhost:8086'}

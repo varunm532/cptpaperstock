@@ -12,7 +12,7 @@
     window.login_user = function(){
         var uid = document.getElementById('uid').value;
         var password = document.getElementById('password').value;
-        var name = uid;
+        var name = document.getElementById('name').value;
 
         var data = {
             uid: uid,
@@ -44,12 +44,19 @@
         .catch((error) => {
             console.error('Error:', error);
         });
+        window.location.href = "{{site.baseurl}}/display/"
     }
 </script>
 
 <h2>Add User</h2>
 
 <form action="javascript:login_user()">
+    <p>
+        <label>
+            Username:
+            <input type="text" name="name" id="name" required>
+        </label>
+    </p>
     <p><label>
         User ID:
         <input type="text" name="uid" id="uid" required>
