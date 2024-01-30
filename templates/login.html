@@ -54,8 +54,13 @@
             })
             .catch((error) => {
                 console.error('Error:', error);
+                window.location.href = "{{site.baseurl}}/403";
             });
-            // window.location.href = "{{site.baseurl}}/display/"
+            userBody = "{" + "uid: " + document.getElementById('uid').value + "," + " password: " + document.getElementById('password').value + "}";
+            console.log(userBody);
+            window.localStorage.setItem('userBody', userBody);
+            console.log("User Auth Token Stored Successfully")
+            window.location.href = "/display";
         }
     }
 </script>

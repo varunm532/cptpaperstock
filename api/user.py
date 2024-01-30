@@ -69,6 +69,26 @@ class UserAPI:
             users = User.query.all()    # read/extract all users from database
             json_ready = [user.read() for user in users]  # prepare output in json
             return jsonify(json_ready)  # jsonify creates Flask response object, more specific to APIs than json.dumps
+        
+        # @token_required
+        def delete(self):
+            ''' Read data from json body '''
+            body = request.get_json()
+            ''' Avoid garbage in, error checking '''
+            # validate uid, username, and password
+            uid = body.get('uid')
+            password = body.get('password')
+            if uid is None or len(uid) < 2:
+                return {'message': f'User ID is missing, or is less than 2 characters'}, 400
+            if password is None or len(password) < 2:
+                return {'message': f'Password is missing, or is less than 2 characters'}, 400
+            ''' Find user '''
+            user = User.query.filter_by(_uid=uid).first()
+            if user is None:
+                return {'message': f'User {uid} not found'}, 400
+            ''' Delete user '''
+            user.delete()
+            return {'message': f'User {uid} deleted'}, 200
     
     class _Security(Resource):
         def post(self):

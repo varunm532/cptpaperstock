@@ -45,17 +45,35 @@ def index():
 def table():
     return render_template("table.html")
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/register/', methods=['GET', 'POST'])
 def login():
     # Define your site variable here
     site = {'baseurl': 'http://localhost:8086'}
     return render_template('login.html', site=site)
 
-@app.route('/signin', methods=['GET', 'POST'])
+@app.route('/signin/', methods=['GET', 'POST'])
 def signin():
     # Define your site variable here
     site = {'baseurl': 'http://localhost:8086'}
     return render_template('signin.html', site=site)
+
+@app.route('/help/', methods=['GET', 'POST'])
+def help():
+    # Define your site variable here
+    site = {'baseurl': 'http://localhost:8086'}
+    return render_template('help.html', site=site)
+
+@app.route('/logout/', methods=['GET', 'POST'])
+def logout():
+    # Define your site variable here
+    site = {'baseurl': 'http://localhost:8086'}
+    return render_template('logout.html', site=site)
+
+@app.route('/profile/', methods=['GET', 'POST'])
+def profile():
+    # Define your site variable here
+    site = {'baseurl': 'http://localhost:8086'}
+    return render_template('profile.html', site=site)
 
 @app.route('/display/', methods=['GET'])
 def display():

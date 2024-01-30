@@ -1,0 +1,20 @@
+<html>
+    <body>
+        <div class="index">
+            <div class="jumbotron jumbotron-fluid" style="text-align: center; ">
+                <h2>Thank you for using our service</h2>
+                <!-- Prompt user to logout with button -->
+                <button id="logoutButton">Logout</button>
+
+                <p>Want To Go Back?</p>
+                <a href="javascript:history.back()">Go Back</a>
+            </div>
+        </div>
+        <script>
+            document.getElementById('logoutButton').addEventListener('click', function() {
+                window.localStorage.removeItem('userBody');
+                window.location.href = "/";
+            });
+        </script>
+    </body>
+</html>

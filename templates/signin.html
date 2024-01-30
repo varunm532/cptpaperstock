@@ -32,10 +32,11 @@
                 .catch(err => {
                     console.error(err);
                     alert("User Authenticated Successfully");
-                    // window.location.href = "/display";
                     userBody = "{" + "uid: " + document.getElementById('uid').value + "," + " password: " + document.getElementById('password').value + "}";
                     console.log(userBody);
-                    // window.localStorage.setItem('userBody', body);
+                    window.localStorage.setItem('userBody', userBody);
+                    console.log("User Auth Token Stored Successfully")
+                    window.location.href = "/display";
                 });
             }
         </script>
