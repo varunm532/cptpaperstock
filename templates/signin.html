@@ -1,6 +1,12 @@
 <html>
     <body>
-        <form action="javascript:login_user()">
+        <form action="javascript:signin()">
+            <p>
+                <label>
+                    Username:
+                    <input type="text" name="name" id="name" required>
+                </label>
+            </p>
             <p><label>
                 User ID:
                 <input type="text" name="uid" id="uid" required>
@@ -13,8 +19,39 @@
                 <button>Login</button>
             </p>
         </form>
-        <script>
-            
+        <script type="module">
+            import { uri, options } from '/static/js/api/config.js';
+
+            function signin(){
+                const authurl = uri + '/api/users/authenticate';
+                const body = {
+                    username: document.getElementById('uid').value,
+                    uid: document.getElementById('uid').value,
+                    password: document.getElementById('password').value
+                };
+                const authOptions = {
+                    ...options,
+                    method: 'POST',
+                    body: JSON.stringify(body),
+                    cache: 'no-cache'
+                };
+                // Fetch the JWT
+                fetch(authurl, authOptions)
+                .then(response =>{
+                    if (!response.ok){
+                        throw new Error('Error authenticating user');
+                        return;
+                    }
+                    // Login Successful
+                    window.location.href = "{{site.baseurl}}/display/";
+                })
+                .catch(err => {
+                    console.error(err);
+                });
+            }
+
+            // Attach signin function to window object
+            window.signin = signin;
         </script>
     </body>
 </html>
