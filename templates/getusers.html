@@ -12,67 +12,59 @@
             </tbody>
         </table>
 
-        <script type="module", src="/static/js/api/config.js"></script>
+        <!-- <script type="module" src="/static/js/api/config.js"></script> -->
         <script type="module">
-            import { uri } from '/static/js/api/config.js';
-            // Set Users endpoint (list of users)
-            const url = uri + '/api/users/';
-          
-            // prepare HTML result container for new output
-            const resultContainer = document.getElementById("result");
-            const header = new Headers();
-            header.append("Cookie", "jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfdWlkIjoidG9ieSJ9.k8yO84FQ_L3RY-MhpTWzFgIHJUcRnROtNm2En0SpKcA");
-
-            const requestOptions = {
+          import { uri } from '/static/js/api/config.js';
+      
+          const url = uri + '/api/users/';
+          const authurl = uri + '/api/users/authenticate';
+        
+          // prepare HTML result container for new output
+          const resultContainer = document.getElementById("result");
+      
+          // Assuming you have some form of credentials to send
+          const credentials = {
+              username: document.getElementById('username').value,
+              uid: document.getElementById('uid').value,
+              password: document.getElementById('password').value
+          };
+      
+          const authrequestOptions = {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(credentials)
+          };
+      
+          const requestOptions = {
               method: 'GET',
-              headers: header,
-              redirect: 'follow'
-            };
-            fetch(url, requestOptions)
-              // response is a RESTful "promise" on any successful fetch
+          };
+      
+          fetch(authurl, authrequestOptions)
               .then(response => {
-                // check for response errors and display
-                if (response.status !== 200) {
-                    const errorMsg = 'Database response error: ' + response.status;
-                    console.log(errorMsg);
-                    const tr = document.createElement("tr");
-                    const td = document.createElement("td");
-                    td.innerHTML = errorMsg;
-                    tr.appendChild(td);
-                    resultContainer.appendChild(tr);
-                    return;
-                }
-                // valid response will contain JSON data
-                response.json().then(data => {
-                    console.log(data);
-                    for (const row of data) {
-                      // tr and td build out for each row
-                      const tr = document.createElement("tr");
-                      const name = document.createElement("td");
-                      const id = document.createElement("td");
-                      const age = document.createElement("td");
-                      // data is specific to the API
-                      name.innerHTML = row.name; 
-                      id.innerHTML = row.uid; 
-                      age.innerHTML = row.age; 
-                      // this builds td's into tr
-                      tr.appendChild(name);
-                      tr.appendChild(id);
-                      tr.appendChild(age);
-                      // append the row to table
-                      resultContainer.appendChild(tr);
-                    }
-                })
-            })
-            // catch fetch errors (ie ACCESS to server blocked)
-            .catch(err => {
-              console.error(err);
-              const tr = document.createElement("tr");
-              const td = document.createElement("td");
-              td.innerHTML = err + ": " + url;
-              tr.appendChild(td);
-              resultContainer.appendChild(tr);
-            });
-          </script>
+                  if (!response.ok) {
+                      throw new Error('Error authenticating user');
+                  }
+                  console.log('User authenticated');
+                  return response.json();
+              })
+              .then(data => {
+                  console.log(data);
+                  // After successful authentication, fetch the user data
+                  return fetch(url, requestOptions);
+              })
+              .then(response => {
+                  if (!response.ok) {
+                      throw new Error('Error fetching user data');
+                  }
+                  return response.json();
+              })
+              .then(data => {
+                  // Process and display the user data here...
+                  console.log(data);
+              })
+              .catch(err => {
+                  console.error(err);
+              });
+      </script>
     </body>
 </html>

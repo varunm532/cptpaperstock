@@ -31,10 +31,10 @@ class UserAPI:
             # look for password and dob
             password = body.get('password')
             dob = body.get('dob')
+            pnum = body.get('pnum')
 
             ''' #1: Key code block, setup USER OBJECT '''
-            uo = User(name=name,
-                      uid=uid)
+            uo = User(name=name, uid=uid, password=password, pnum=pnum)
             
             ''' Additional garbage error checking '''
             # set password if provided
@@ -46,6 +46,14 @@ class UserAPI:
                     uo.dob = datetime.strptime(dob, '%Y-%m-%d').date()
                 except:
                     return {'message': f'Date of birth format error {dob}, must be mm-dd-yyyy'}, 400
+            
+            if pnum is not None:
+                try:
+                    if pnum is None:
+                        pnum = "123-456-7890"
+                except:
+                    return {'message': f'Phone number format error {pnum}, must be 10 digits'}, 400
+            
             
             ''' #2: Key Code block to add user to database '''
             # create user in database

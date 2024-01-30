@@ -1,25 +1,6 @@
 <html>
     <body>
-        <form action="javascript:signin()">
-            <p>
-                <label>
-                    Username:
-                    <input type="text" name="name" id="name" required>
-                </label>
-            </p>
-            <p><label>
-                User ID:
-                <input type="text" name="uid" id="uid" required>
-            </label></p>
-            <p><label>
-                Password:
-                <input type="password" name="password" id="password" required>
-            </label></p>
-            <p>
-                <button>Login</button>
-            </p>
-        </form>
-        <script type="module">
+        <script>
             import { uri, options } from '/static/js/api/config.js';
 
             function signin(){
@@ -42,16 +23,33 @@
                         throw new Error('Error authenticating user');
                         return;
                     }
-                    // Login Successful
-                    window.location.href = "{{site.baseurl}}/display/";
+                    else{
+                        return response.json();
+                    }
+                    // // Login Successful
+                    // window.location.href = "{{site.baseurl}}/display/";
                 })
                 .catch(err => {
                     console.error(err);
                 });
             }
-
-            // Attach signin function to window object
-            window.signin = signin;
         </script>
+        <form action="javascript:signin()">
+            <p><label>
+                    Username:
+                    <input type="text" name="name" id="name" required>
+            </label></p>
+            <p><label>
+                User ID:
+                <input type="text" name="uid" id="uid" required>
+            </label></p>
+            <p><label>
+                Password:
+                <input type="password" name="password" id="password" required>
+            </label></p>
+            <p>
+                <button>Login</button>
+            </p>
+        </form>
     </body>
 </html>

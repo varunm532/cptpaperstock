@@ -33,6 +33,10 @@ def page_not_found(e):
     # note that we set the 404 status explicitly
     return render_template('404.html'), 404
 
+@app.route('/403/')
+def error():
+    return render_template('403.html'), 403
+
 @app.route('/')  # connects default URL to index() function
 def index():
     return render_template("index.html")
