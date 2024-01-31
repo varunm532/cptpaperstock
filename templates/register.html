@@ -15,14 +15,17 @@
         var name = document.getElementById('name').value;
         var pnum = document.getElementById('pnum').value;
 
-        if (uid == '' || password == '' || name == '' || uid == null || password == null || name == null) {
+        if (uid == '' || password == '' || name == '' || uid == null || password == null || pnum == null || name == null) {
             // window.location.href = "{{site.baseurl}}/403";
             return ("Please fill out all fields and ensure the name is at least 2 characters long");
         }
         else{
+            if (pnum = '' || pnum == null) {
+                pnum = "1234567890";
+            }
+            pnum = String(pnum);
             // convert pnum to format 123-456-7890
             pnum = pnum.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
-
             var data = {
                 uid: uid,
                 password: password,
@@ -60,7 +63,7 @@
             console.log(userBody);
             window.localStorage.setItem('userBody', userBody);
             console.log("User Auth Token Stored Successfully")
-            // window.location.href = "/display";
+            window.location.href = "/display";
         }
     }
 </script>

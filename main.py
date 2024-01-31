@@ -49,7 +49,7 @@ def table():
 def login():
     # Define your site variable here
     site = {'baseurl': 'http://localhost:8086'}
-    return render_template('login.html', site=site)
+    return render_template('register.html', site=site)
 
 @app.route('/signin/', methods=['GET', 'POST'])
 def signin():
