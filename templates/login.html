@@ -15,8 +15,8 @@
         var name = document.getElementById('name').value;
         var pnum = document.getElementById('pnum').value;
 
-        if (uid == '' || password == '' || pnum == '' || name == '' || uid == null || password == null || pnum == null || name == null || name.length < 2) {
-            window.location.href = "{{site.baseurl}}/403";
+        if (uid == '' || password == '' || name == '' || uid == null || password == null || name == null) {
+            // window.location.href = "{{site.baseurl}}/403";
             return ("Please fill out all fields and ensure the name is at least 2 characters long");
         }
         else{
@@ -60,7 +60,7 @@
             console.log(userBody);
             window.localStorage.setItem('userBody', userBody);
             console.log("User Auth Token Stored Successfully")
-            window.location.href = "/display";
+            // window.location.href = "/display";
         }
     }
 </script>

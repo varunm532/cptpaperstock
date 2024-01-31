@@ -5,7 +5,7 @@
             window.sign_in = function signin(){
                 const authurl = '/api/users/authenticate';
                 const body = {
-                    username: document.getElementById('uid').value,
+                    name: document.getElementById('uid').value,
                     uid: document.getElementById('uid').value,
                     password: document.getElementById('password').value
                 };

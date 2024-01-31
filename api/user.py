@@ -75,7 +75,7 @@ class UserAPI:
             ''' Read data from json body '''
             body = request.get_json()
             ''' Avoid garbage in, error checking '''
-            # validate uid, username, and password
+            # validate uid, name, and password
             uid = body.get('uid')
             password = body.get('password')
             if uid is None or len(uid) < 2:
