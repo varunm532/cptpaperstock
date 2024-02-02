@@ -12,6 +12,7 @@ from __init__ import app, db, cors  # Definitions initialization
 # setup APIs
 from api.user import user_api # Blueprint import api definition
 from api.player import player_api
+from api.searchstocks import search_api
 # database migrations
 from model.users import initUsers
 from model.players import initPlayers
@@ -27,6 +28,7 @@ db.init_app(app)
 app.register_blueprint(user_api) # register api routes
 app.register_blueprint(player_api)
 app.register_blueprint(app_projects) # register app pages
+app.register_blueprint(search_api)
 
 @app.errorhandler(404)  # catch for URL not found
 def page_not_found(e):
@@ -44,6 +46,10 @@ def index():
 @app.route('/table/')  # connects /stub/ URL to stub() function
 def table():
     return render_template("table.html")
+
+@app.route('/search/')
+def search():
+    return render_template("stocksearch.html")
 
 @app.route('/register/', methods=['GET', 'POST'])
 def login():
