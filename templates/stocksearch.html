@@ -20,41 +20,37 @@
 
         $("#symbol").autocomplete({
             source: function(request, response) {
-                $.ajax({
-                    url: 'https://www.alphavantage.co/query',
-                    dataType: 'json',
-                    data: {
-                        function: 'SYMBOL_SEARCH',
-                        keywords: request.term,
-                        apikey: apiKey
-                    },
-                    success: function(data) {
-                        response($.map(data.bestMatches, function(item) {
-                            return {
-                                label: item['1. symbol'] + ' - ' + item['2. name'],
-                                value: item['1. symbol']
-                            };
-                        }));
-                    }
+                var url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${request.term}&apikey=${apiKey}`;
+                fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    response($.map(data.bestMatches, function(item) {
+                        return {
+                            label: item['1. symbol'] + ' - ' + item['2. name'],
+                            value: item['1. symbol']
+                        };
+                    }));
                 });
             },
             minLength: 2
         });
 
-        $("#stock-search-form").submit(function(event) {
+        document.getElementById('stock-search-form').addEventListener('submit', function(event) {
             event.preventDefault();
-            var symbol = $("#symbol").val();
-            $.ajax({
-                url: '/api/stock/search',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ symbol: symbol }),
-                success: function(response) {
-                    $("#result").html('Symbol: ' + response.symbol + ', Current Price: ' + response.current_price);
+            var symbol = document.getElementById('symbol').value;
+            fetch('/api/stock/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
                 },
-                error: function(response) {
-                    $("#result").html('Error: ' + response.responseJSON.error);
-                }
+                body: JSON.stringify({ symbol: symbol })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerHTML = 'Symbol: ' + data.symbol + ', Current Price: ' + data.current_price;
+            })
+            .catch(error => {
+                document.getElementById('result').innerHTML = 'Error: ' + error;
             });
         });
     </script>

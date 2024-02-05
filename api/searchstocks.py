@@ -1,14 +1,22 @@
 from flask import Blueprint, request, jsonify, Flask
-from flask_restful import Api, Resource
+from flask_restful import Api, Resource, reqparse
+from flask_cors import CORS  # Import the CORS extension
 from alpha_vantage.timeseries import TimeSeries
 
 search_api = Blueprint('search_api', __name__, url_prefix='/api/stock')
 api = Api(search_api)
+app = Flask(__name__)
+CORS(app)  # Enable CORS for the entire app
 
 class SearchAPI(Resource):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('symbol', type=str, required=True, help='No stock symbol provided', location='json')
+        super(SearchAPI, self).__init__()
+
     def post(self):
-        data = request.get_json()
-        stock_symbol = data.get('symbol')
+        args = self.reqparse.parse_args()
+        stock_symbol = args['symbol']
 
         if not stock_symbol:
             return jsonify({'error': 'Missing stock symbol or incorrect format.'}), 400
