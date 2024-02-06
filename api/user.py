@@ -1,5 +1,6 @@
 import json, jwt
 from flask import Blueprint, request, jsonify, current_app, Response
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_restful import Api, Resource # used for REST API building
 from datetime import datetime
 from auth_middleware import token_required
@@ -8,6 +9,7 @@ from model.users import User
 
 user_api = Blueprint('user_api', __name__,
                    url_prefix='/api/users')
+
 
 # API docs https://flask-restful.readthedocs.io/en/latest/api.html
 api = Api(user_api)
@@ -32,9 +34,15 @@ class UserAPI:
             password = body.get('password')
             dob = body.get('dob')
             pnum = body.get('pnum')
+            email = body.get('email')
+
+            ''' Set up the email server functionality '''
+            msg = Message('Welcome to Our Website', recipients=[email])
+            msg.body = f'Hello {name}!\n\nThank you for signing up on Our Website. Please follow the instructions to complete your registration.'
+            mail.send(msg)
 
             ''' #1: Key code block, setup USER OBJECT '''
-            uo = User(name=name, uid=uid, password=password, pnum=pnum)
+            uo = User(name=name, uid=uid, password=password, pnum=pnum, email=email)
             
             ''' Additional garbage error checking '''
             # set password if provided
@@ -86,6 +94,10 @@ class UserAPI:
             user = User.query.filter_by(_uid=uid).first()
             if user is None:
                 return {'message': f'User {uid} not found'}, 400
+            ''' Confirm Password Is Valid'''
+            password = User.query.filter_by(password=password).first()
+            if password is None:
+                return {'message': f'Invalid password for user {uid}'}, 400
             ''' Delete user '''
             user.delete()
             return {'message': f'User {uid} deleted'}, 200

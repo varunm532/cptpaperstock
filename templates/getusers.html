@@ -23,7 +23,9 @@
       
           const url = '/api/users/';
           const authurl = '/api/users/authenticate';
-          const userAuthBody = window.localStorage.getItem('userBody')
+          const uid = window.localStorage.getItem('uid')
+          console.log(uid);
+          const userAuthBody = window.localStorage.getItem('userBody');
 
           // prepare HTML result container for new output
           const resultContainer = document.getElementById("result");
@@ -45,7 +47,7 @@
               method: 'GET',
           };
 
-          if (!userAuthBody) {
+          if (uid != 'admin') {
             console.log("User Authentication Failed");
             window.location.href = "/403";
           } else {

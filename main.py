@@ -3,6 +3,9 @@ import threading
 # import "packages" from flask
 from flask import render_template,request  # import render_template from "public" flask libraries
 from flask.cli import AppGroup
+from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_mail import Message
+from flask_mail import Mail
 
 
 # import "packages" from "this" project
@@ -21,6 +24,14 @@ from model.players import initPlayers
 from projects.projects import app_projects # Blueprint directory import projects definition
 
 
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 2525
+app.config['MAIL_USERNAME'] = '59af6097944f00'
+app.config['MAIL_PASSWORD'] = '247cd953ec1b36'
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+
+mail = Mail(app)
 # Initialize the SQLAlchemy object to work with the Flask app instance
 db.init_app(app)
 
@@ -52,9 +63,42 @@ def search():
     return render_template("stocksearch.html")
 
 @app.route('/register/', methods=['GET', 'POST'])
-def login():
+def register():
     # Define your site variable here
     site = {'baseurl': 'http://localhost:8086'}
+
+    if request.method == 'POST':
+        uid = request.form.get('uid')
+        password = request.form.get('password')
+        name = request.form.get('name')
+        pnum = request.form.get('pnum')
+        email = request.form.get('email')
+
+        if not (uid and password and name and pnum and email):
+            flash('Please fill out all fields.')
+            return redirect(url_for('register'))
+
+        # Check if the email is correctly formatted, else return an error
+        if '@' not in email or '.' not in email:
+            flash('Please enter a valid email address.')
+            return redirect(url_for('register'))
+
+        def send_email(email):
+            msg = Message(
+                'Registration Confirmation',
+                sender='torindeanwolff@gmail.com',
+                recipients=[email]
+            )
+            msg.body = 'Thank you for registering to Atlas Index!'
+            mail.send(msg)
+
+        # Send an email
+        send_email(email)
+
+        # Redirect to a success page or do something else as needed
+        flash('Registration successful! An email has been sent to your email address.')
+        return redirect(url_for('index'))
+
     return render_template('register.html', site=site)
 
 @app.route('/signin/', methods=['GET', 'POST'])
@@ -86,6 +130,7 @@ def display():
     site = {'baseurl': 'http://localhost:8086'}
     return render_template('getusers.html', site=site)
 
+
 # @app.route('/display/')
 # def display():
 #     return render_template("displayusers.html")
@@ -94,7 +139,7 @@ def display():
 def before_request():
     # Check if the request came from a specific origin
     allowed_origin = request.headers.get('Origin')
-    if allowed_origin in ['http://localhost:4100', 'http://127.0.0.1:4100', 'https://nighthawkcoders.github.io']:
+    if allowed_origin in ['http://localhost:4100', 'http://127.0.0.1:4100', 'https://nighthawkcoders.github.io', 'http://localhost:8086']:
         cors._origins = allowed_origin
 
 # Create an AppGroup for custom commands

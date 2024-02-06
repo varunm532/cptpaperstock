@@ -1,5 +1,22 @@
 <html>
     <body>
+        <form action="javascript:sign_in()">
+            <p><label>
+                    Username:
+                    <input type="text" name="name" id="name" required>
+            </label></p>
+            <p><label>
+                User ID:
+                <input type="text" name="uid" id="uid" required>
+            </label></p>
+            <p><label>
+                Password:
+                <input type="password" name="password" id="password" required>
+            </label></p>
+            <p>
+                <button>Login</button>
+            </p>
+        </form>
         <script>
             // import { uri, options } from '/static/js/api/config.js';
             window.sign_in = function signin(){
@@ -27,35 +44,25 @@
                         users.innerHTML = JSON.stringify(data);
                     }
                     alert("User Doesnt Exist");
-                    // window.location.href = "/register";
+                    window.location.href = "/register";
                 })
                 .catch(err => {
+                    uid = document.getElementById('uid');
+                    window.localStorage.setItem('uid', uid)
+                    if (uid = 'admin') {
+                        window.location.href = "/display";
+                    }
+                    else {
+                        window.location.href = "/";
+                    }
                     console.error(err);
                     alert("User Authenticated Successfully");
                     userBody = "{" + "uid: " + document.getElementById('uid').value + "," + " password: " + document.getElementById('password').value + "}";
                     console.log(userBody);
                     window.localStorage.setItem('userBody', userBody);
                     console.log("User Auth Token Stored Successfully")
-                    window.location.href = "/display";
                 });
             }
         </script>
-        <form action="javascript:sign_in()">
-            <p><label>
-                    Username:
-                    <input type="text" name="name" id="name" required>
-            </label></p>
-            <p><label>
-                User ID:
-                <input type="text" name="uid" id="uid" required>
-            </label></p>
-            <p><label>
-                Password:
-                <input type="password" name="password" id="password" required>
-            </label></p>
-            <p>
-                <button>Login</button>
-            </p>
-        </form>
     </body>
 </html>

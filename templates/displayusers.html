@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -51,7 +50,12 @@
 
     // Call the displayUsers function on page load
     window.onload = function() {
-        displayUsers();
+        uid = window.localStorage.getItem('uid');
+        if (uid == 'admin')
+            displayUsers();
+        else
+            alert('You are not authorized to view this page');
+            window.location.href = '/403'
     };
 </script>
 
