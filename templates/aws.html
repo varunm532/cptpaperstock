@@ -1,0 +1,303 @@
+<html>
+    <head>
+        <style>
+            body {
+                background-color: #2b2b2b;
+                color: #e0e0e0;
+                font-family: Arial, sans-serif;
+            }
+
+            a {
+                color: #1e90ff;
+            }
+
+            a:hover {
+                color: #63a69f;
+            }
+
+            h1, h2, h3, h4, h5, h6 {
+                color: #d0d0d0;
+            }
+
+            .container {
+                margin: 0 auto;
+                max-width: 800px;
+                padding: 1em;
+            }
+
+            .card {
+                background-color: #3c3c3c;
+                border-radius: 5px;
+                padding: 1em;
+                margin-bottom: 1em;
+            }
+
+            .card-header {
+                border-bottom: 1px solid #4c4c4c;
+                padding-bottom: 0.5em;
+                margin-bottom: 0.5em;
+            }
+
+            .card-body {
+                padding: 1em;
+            }
+
+            .btn {
+                background-color: #1e90ff;
+                color: #ffffff;
+                padding: 0.5em 1em;
+                text-decoration: none;
+                border-radius: 5px;
+            }
+
+            .btn:hover {
+                background-color: #63a69f;
+            }
+        </style>
+    </head>
+<body>
+
+<script src="static/js/api/config.js">
+    // {% raw %}{{site.baseurl}}{% endraw %} is the baseurl of the site
+</script>
+
+<div class="product" style="margin-top: 2%;">
+    <div class="row" style="padding: 10%; padding-top: 0%; padding-bottom: 5%;">
+
+        <div class="col-8" >
+            <h1>{{ project }} Project</h1>
+        </div>
+
+    </div>
+
+    <div class="row" style="padding-left: 0%;">
+        <div class="col-3">
+            <a href="#overviewSection" class="btn" id="overviewScrollButton" type="button">Overview</a>
+        </div>
+    
+        <!-- <div class="col-3">
+            <a href="{{ scrumboard }}" class="btn">Scrum Board</a>
+        </div>
+    
+        <div class="col-3">
+            <a href="{{ repo }}" class="btn">Repository</a>
+        </div>
+    
+        <div class="col-3">
+            <a href="{{ authors }}" class="btn">Authors</a>
+        </div> -->
+    </div>
+
+    <br>
+
+
+
+
+
+    <br>
+
+
+
+
+    <br>
+    <br>
+
+
+
+
+
+    <br>
+
+
+
+
+    <br>
+    <br>
+
+
+
+
+
+    <br>
+
+
+
+
+    <br>
+    <br>
+
+
+
+
+
+    <br>
+
+
+
+
+    <br>
+
+    <div class="overview">
+        <div class="border-fill"></div>
+            <h2 id="overviewSection">Getting Started.</h2>
+            <p>First run a git clone of the template repository <a href="https://github.com/nighthawkcoders/flask_portfolio"> Github Template </a> on your local machine. Then run the following commands to get the project up and running.</p>
+            <ln>cd flask_portfolio (Replace flask_portfolio with your folder name for the project.)</ln>
+            <p>vscode .</p>
+            <p>Inside vscode look for main.py, Dockerfile, docker_compose.yml, and requirements.txt. These are the files that will need to be modified to get the project up and running. Once in those files find the example port so flask_portfolio looks like 80:80 and replace it with a port of your choice with 8--- as the leading port #.</p>
+            <p>Once you have done that run the following commands in the terminal.</p>
+            <ln>docker-compose build</ln>
+            <p>Once that is done check it by opening http://localhost:(Your port number selected).</p>
+            <p>Now that you have the project up and running you can start working on aws deployment. Go to <a href="https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Instances:v=3;$case=tags:true%5C,client:false;$regex=tags:false%5C,client:false;sort=publicIp">Aws Server Page </a></p>
+            <p>Click IAM user and log in as "nighthawkcodingsociety". Your IAM Username is your github profile name, and the password is "123Qwerty!". Once you log in, you will be required to change your password, which should have one lowercase letter, one uppercase letter, one number, and one special character (as well as a minimmum length of 8 characters). Once you have changed your password, you will be redirected to the AWS console.</p>
+
+            <h2>Importing To AWS EC2</h2>
+            <p>Once you are in the AWS console, click on EC2. Then click on the "CSP" instance.</p>
+            <p>Inside the instance you will see Public IPv4 DNS, with a link to open the address. Click on that and it will redirect you to Ubuntu where it prompts you to sign in. Sign in with Username:ubuntu and Password:Ubuntu14*&*41.</p>
+            <p>Once you are in Ubuntu, run the following commands in the terminal.</p>
+            <ln>"git clone (put your github HTML clone link here)" it may prompt you to log in if it does put your Github Username and then your <a href="https://github.com/settings/tokens">github token</a>. once done type ls to see if you see your repository name.</ln>
+            <ln>Build your site: docker-compose up -d --build</ln>
+            <ln>Test your site: curl localhost:8--- (replace "8—" with your port number)</ln>
+            <ln>If all works then proceed if not reach out to a teacher or student helper for more assistance.</ln>
+
+            <h2>Configuring Your Domain</h2>
+            <p>Go to AWS Route 53 and setup DNS subdomain for your backend server.</p>
+            <p>Click on hosted zones and click on stu.nighthawkcodingsociety.com. Click create record and name it what ever you want. For me i will be using my pre-existing one nartbackend.ect.com. Set record type to A, and for the value set it to 3.130.255.192. TTL is time to live, the higher the value the more expensive, so I recommend between 300-600.</p>
+
+
+            <h2>Nginx Setup</h2>
+            <p>Navigate in terminal to nginx on the ec2: cd /etc/nginx/sites-available</p>
+            <p>Create an nginx config file (change projectUniqueName to make you unique config file): sudo nano projectUniqueName (IMPORTANT: projectuniquename must match the folder name of your project in the main directory.)</p>
+            <p>Use the template below to write your config file, and make the changes according to the comments.</p>
+            <pre><code>server {
+                listen 80;
+                 listen [::]:80;
+                 server_name -----.stu.nighthawkcodingsociety.com ; # CHANGE SERVER NAME TO YOUR REGISTERED DOMAIN
+                 location / {
+                     proxy_pass http://localhost:8---; # CHANGE PORT TO YOUR UNIQUE PORT
+                     # Simple requests
+                     if ($request_method ~* "(GET|POST|PUT|DELETE)") { # Customize Request methods based on your needs
+                             add_header "Access-Control-Allow-Origin"  *;
+                     }
+                     # Preflighted requests
+                     if ($request_method = OPTIONS ) {
+                             add_header "Access-Control-Allow-Origin"  *;
+                             add_header "Access-Control-Allow-Methods" "GET, POST, PUT, DELETE, OPTIONS, HEAD"; # Make sure the request methods above match here
+                             add_header "Access-Control-Allow-Headers" "Authorization, Origin, X-Requested-With, Content-Type, Accept";
+                             return 200;
+                     }
+                 }
+             }</code></pre>
+             <p>To save changes, ctl X or cmd X, then y, then enter. </p>
+             <p>Activate configuration. Create a symbolic link (change projectUniqueName to your nginx config file name): cd /etc/nginx/sites-enabled, then sudo ln -s /etc/nginx/sites-available/projectUniqueName /etc/nginx/sites-enabled.</p>
+             <p>Validate by running: sudo nginx -t</p>
+             <p>Restart nginx: sudo systemctl restart nginx</p>
+             <p>Test your domain name on your desktop browser now (only http://, not https://.</p>
+
+
+            <h2>CertBot Config</h2>
+            <p>Run command to right and follow prompts: "sudo certbot --nginx"</p>
+            <h3>Ideal Terminal Output</h3>
+            <pre><code>
+            Saving debug log to /var/log/letsencrypt/letsencrypt.log
+            Plugins selected: Authenticator nginx, Installer nginx
+                
+             Which names would you like to activate HTTPS for?
+             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+             ...
+             28: cars.nighthawkcodingsociety.com
+             29: dolphin.nighthawkcodingsociety.com
+             30: saakd.nighthawkcodingsociety.com
+             ...
+             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+             Select the appropriate numbers separated by commas and/or spaces, or leave input
+             blank to select all options shown (Enter 'c' to cancel): # ENTER YOUR CORRESPONDING NUMBER
+                
+             Cert not yet due for renewal
+                
+             You have an existing certificate that has exactly the same domains or certificate name you requested and isn't close to expiry.
+             (ref: /etc/letsencrypt/renewal/nighthawkcodingsociety.com-0001.conf)
+                
+             What would you like to do?
+             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+             1: Attempt to reinstall this existing certificate
+            2: Renew & replace the cert (limit ~5 per 7 days)
+            - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+            Select the appropriate number [1-2] then [enter] (press 'c' to cancel): 2
+            Renewing an existing certificate
+            Performing the following challenges:
+            http-01 challenge for nighthawkcodingsociety.com
+            http-01 challenge for csa.nighthawkcodingsociety.com
+            http-01 challenge for cso.nighthawkcodingsociety.com
+            http-01 challenge for flm.nighthawkcodingsociety.com
+            Waiting for verification...
+            Cleaning up challenges
+            Deploying Certificate to VirtualHost /etc/nginx/sites-enabled/nighthawk_society
+            Deploying Certificate to VirtualHost /etc/nginx/sites-enabled/nighthawk_csa
+            Deploying Certificate to VirtualHost /etc/nginx/sites-enabled/nighthawk_csp
+            Deploying Certificate to VirtualHost /etc/nginx/sites-enabled/nighthawk_flm
+                
+             Please choose whether or not to redirect HTTP traffic to HTTPS, removing HTTP access.
+             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+             1: No redirect - Make no further changes to the webserver configuration.
+             2: Redirect - Make all requests redirect to secure HTTPS access. Choose this for
+             new sites, or if you're confident your site works on HTTPS. You can undo this
+             change by editing your web server's configuration.
+             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+             Select the appropriate number [1-2] then [enter] (press 'c' to cancel): 2
+             Traffic on port 80 already redirecting to ssl in /etc/nginx/sites-enabled/nighthawk_society
+             Traffic on port 80 already redirecting to ssl in /etc/nginx/sites-enabled/nighthawk_csa
+             Traffic on port 80 already redirecting to ssl in /etc/nginx/sites-enabled/nighthawk_csp
+            Traffic on port 80 already redirecting to ssl in /etc/nginx/sites-enabled/nighthawk_flm
+                
+             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+             Your existing certificate has been successfully renewed, and the new certificate
+             has been installed.
+                
+            The new certificate covers the following domains:
+            https://nighthawkcodingsociety.com, 
+            https://csa.nighthawkcodingsociety.com, 
+            https://csp.nighthawkcodingsociety.com, and
+            https://flm.nighthawkcodingsociety.com,
+             
+             You should test your configuration at:
+             https://www.ssllabs.com/ssltest/analyze.html?d=nighthawkcodingsociety.com
+             https://www.ssllabs.com/ssltest/analyze.html?d=csa.nighthawkcodingsociety.com
+             https://www.ssllabs.com/ssltest/analyze.html?d=csp.nighthawkcodingsociety.com
+             https://www.ssllabs.com/ssltest/analyze.html?d=flm.nighthawkcodingsociety.com
+             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                
+             IMPORTANT NOTES:
+              - Congratulations! Your certificate and chain have been saved at:
+                /etc/letsencrypt/live/nighthawkcodingsociety.com-0001/fullchain.pem
+                Your key file has been saved at:
+                /etc/letsencrypt/live/nighthawkcodingsociety.com-0001/privkey.pem
+                Your cert will expire on 2022-03-06. To obtain a new or tweaked
+                version of this certificate in the future, simply run certbot again
+                with the "certonly" option. To non-interactively renew *all* of
+                your certificates, run "certbot renew"
+              - If you like Certbot, please consider supporting our work by:
+                
+              Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
+              Donating to EFF:                    https://eff.org/donate-le</code></pre>
+                <p>Notice, your output may be different but as long a it shows it worked then all should be fine.</p>
+
+
+                <p>Congrats you finished the AWS Deployment tutorial, now code, code, code and make a beautiful site.</p>
+
+    </div>
+
+</div>
+
+
+
+<footer>
+    <div class="row justify-content-center">
+        <div class="col-2">
+            <a href="https://www.youtube.com/channel/UClIKOsDS5dsfzFA3zveDT3Q?view_as=subscriber" target="_blank"><i class="fa fa-youtube-play"></i></a>
+        </div>
+    </div>
+</footer>
+</div>
+
+</body>
+</html>

@@ -54,6 +54,10 @@ def error():
 def index():
     return render_template("index.html")
 
+@app.route('/aws/')  # connects /about/ URL to about() function
+def aws():
+    return render_template("aws.html")
+
 @app.route('/table/')  # connects /stub/ URL to stub() function
 def table():
     return render_template("table.html")
