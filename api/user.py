@@ -36,13 +36,8 @@ class UserAPI:
             pnum = body.get('pnum')
             email = body.get('email')
 
-            ''' Set up the email server functionality '''
-            msg = Message('Welcome to Our Website', recipients=[email])
-            msg.body = f'Hello {name}!\n\nThank you for signing up on Our Website. Please follow the instructions to complete your registration.'
-            mail.send(msg)
-
             ''' #1: Key code block, setup USER OBJECT '''
-            uo = User(name=name, uid=uid, password=password, pnum=pnum, email=email)
+            uo = User(name=name, uid=uid, password=password, pnum=pnum, email=email, role="user")
             
             ''' Additional garbage error checking '''
             # set password if provided

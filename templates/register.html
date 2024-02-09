@@ -15,6 +15,7 @@
         var name = document.getElementById('name').value;
         var pnum = document.getElementById('pnum').value;
         var email = document.getElementById('email').value;
+        var role = "user";
 
         if (uid == '' || password == '' || name == '' || uid == null || password == null || pnum == null || name == null || email == null || email == '') {
             // window.location.href = "{{site.baseurl}}/403";
@@ -36,7 +37,8 @@
                 password: password,
                 name: name,
                 pnum: pnum,
-                email: email
+                email: email,
+                role: role
             };
 
             var json = JSON.stringify(data);

@@ -25,9 +25,9 @@ from projects.projects import app_projects # Blueprint directory import projects
 
 
 app.config['MAIL_SERVER']='smtp.gmail.com'
-app.config['MAIL_PORT'] = 2525
-app.config['MAIL_USERNAME'] = '59af6097944f00'
-app.config['MAIL_PASSWORD'] = '247cd953ec1b36'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USERNAME'] = 'torindeanwolff@gmail.com'
+app.config['MAIL_PASSWORD'] = 'dslo bpmz hzwv tvnn'
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 
@@ -73,6 +73,7 @@ def register():
         name = request.form.get('name')
         pnum = request.form.get('pnum')
         email = request.form.get('email')
+        print(f"uid: {uid}, password: {password}, name: {name}, pnum: {pnum}, email: {email}")
 
         if not (uid and password and name and pnum and email):
             flash('Please fill out all fields.')
@@ -84,19 +85,23 @@ def register():
             return redirect(url_for('register'))
 
         def send_email(email):
-            msg = Message(
-                'Registration Confirmation',
-                sender='torindeanwolff@gmail.com',
-                recipients=[email]
-            )
-            msg.body = 'Thank you for registering to Atlas Index!'
-            mail.send(msg)
+            try:
+                msg = Message(
+                    'Registration Confirmation',
+                    sender='torindeanwolff@gmail.com',
+                    recipients=[email]
+                )
+                msg.body = 'Thank you for registering to Atlas Index!'
+                mail.send(msg)
+                app.logger.info(f"Email sent successfully to {email}")
+            except Exception as e:
+                app.logger.error(f"Error sending email to {email}: {str(e)}")
+
 
         # Send an email
         send_email(email)
 
         # Redirect to a success page or do something else as needed
-        flash('Registration successful! An email has been sent to your email address.')
         return redirect(url_for('index'))
 
     return render_template('register.html', site=site)
