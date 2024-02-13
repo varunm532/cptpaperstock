@@ -34,10 +34,9 @@ class UserAPI:
             password = body.get('password')
             dob = body.get('dob')
             pnum = body.get('pnum')
-            email = body.get('email')
 
             ''' #1: Key code block, setup USER OBJECT '''
-            uo = User(name=name, uid=uid, password=password, pnum=pnum, email=email, role="user")
+            uo = User(name=name, uid=uid, password=password, pnum=pnum, role="User")
             
             ''' Additional garbage error checking '''
             # set password if provided

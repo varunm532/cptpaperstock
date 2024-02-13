@@ -14,18 +14,13 @@
         var password = document.getElementById('password').value;
         var name = document.getElementById('name').value;
         var pnum = document.getElementById('pnum').value;
-        var email = document.getElementById('email').value;
         var role = "user";
 
-        if (uid == '' || password == '' || name == '' || uid == null || password == null || pnum == null || name == null || email == null || email == '') {
+        if (uid == '' || password == '' || name == '' || uid == null || password == null || pnum == null || name == null) {
             // window.location.href = "{{site.baseurl}}/403";
             return ("Please fill out all fields and ensure the name is at least 2 characters long or Email is present");
         }
         else{
-            // check if the email is correctly formatted, else return error
-            if (email.indexOf('@') == -1 || email.indexOf('.') == -1) {
-                return ("Please enter a valid email address");
-            }
             if (pnum = '' || pnum == null) {
                 pnum = "1234567890";
             }
@@ -37,7 +32,6 @@
                 password: password,
                 name: name,
                 pnum: pnum,
-                email: email,
                 role: role
             };
 
@@ -47,7 +41,6 @@
             console.log('password:', password);
             console.log('name:', name);
             console.log('pnum:', pnum);
-            console.log('email:', email);
 
             fetch(url, {
                 method: 'POST',
@@ -100,11 +93,6 @@
             <input type="text" name="pnum" id="pnum">
         </label>
     </p>
-    <p>
-        <label>
-        Email:
-            <input type="text" name="email" id="email">
-        </label>
     <p>
         <button>Login</button>
     </p>

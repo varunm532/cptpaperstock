@@ -1,47 +1,38 @@
-from flask import Blueprint, request, jsonify, Flask
-from flask_restful import Api, Resource, reqparse
-from flask_cors import CORS  # Import the CORS extension
-from alpha_vantage.timeseries import TimeSeries
+from flask import Flask, render_template, Blueprint, jsonify, request
+import requests
 
-search_api = Blueprint('search_api', __name__, url_prefix='/api/stock')
-api = Api(search_api)
-app = Flask(__name__)
-CORS(app)  # Enable CORS for the entire app
 
-class SearchAPI(Resource):
-    def __init__(self):
-        self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('symbol', type=str, required=True, help='No stock symbol provided', location='json')
-        super(SearchAPI, self).__init__()
+class StockBlueprint(Blueprint):
+    def __init__(self, name, import_name, **kwargs):
+        super().__init__(name, import_name, **kwargs)
 
-    def post(self):
-        args = self.reqparse.parse_args()
-        stock_symbol = args['symbol']
+        self.route('/search', methods=['POST'])(self.search_stock)
 
-        if not stock_symbol:
-            return jsonify({'error': 'Missing stock symbol or incorrect format.'}), 400
-
+    def search_stock(self):
         try:
-            ts = TimeSeries(key='H6POU8JVDEI52Y0K', output_format='pandas')
-            stock_data, _ = ts.get_quote_endpoint(symbol=stock_symbol)
-        except Exception as e:
-            return jsonify({'error': f'Failed to retrieve stock data: {e}'}), 500
+            data = request.get_json()
+            symbol = data['symbol']
 
-        if '05. price' in stock_data:
-            current_price = stock_data['05. price']
-            response_data = {
-                'symbol': stock_symbol,
-                'current_price': current_price.item()  # Convert Series to a JSON serializable format
+            # Make a request to the FMP API to get stock information
+            api_key = '034ce1b9ccc7ac857fc59ec5665cfc5e'  # Replace with your FMP API key
+            url = f'https://financialmodelingprep.com/api/v3/quote/{symbol}?apikey={api_key}'
+            response = requests.get(url)
+            stock_data = response.json()
+
+            if not stock_data:
+                return jsonify({'error': 'No data available for the given symbol'}), 404
+
+            # Extract relevant information from the API response
+            stock_info = {
+                'symbol': stock_data[0]['symbol'],
+                'current_price': stock_data[0]['price'],
             }
-            return jsonify(response_data)
-        else:
-            return jsonify({'error': 'Failed to retrieve stock data'}), 500
 
-api.add_resource(SearchAPI, '/search')
+            return jsonify(stock_info)
 
-# Replace 'YOUR_ALPHA_VANTAGE_API_KEY' with your actual Alpha Vantage API key
-if __name__ == "__main__":
-    app = Flask(__name__)
-    app.register_blueprint(search_api)
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
 
-    app.run(debug=True)
+# Create an instance of the StockBlueprint class and register it under the '/api/stock' URL prefix
+search_bp = StockBlueprint('stock', __name__)
+

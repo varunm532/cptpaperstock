@@ -1,57 +1,54 @@
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stock Search</title>
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 </head>
 <body>
     <h1>Stock Search</h1>
-    <form id="stock-search-form">
-        <label for="symbol">Stock Symbol:</label><br>
-        <input type="text" id="symbol" name="symbol"><br>
-        <input type="submit" value="Search">
+    <form id="stockForm">
+        <label for="stock_symbol">Stock Symbol or Name:</label>
+        <input type="text" id="stock_symbol" name="symbol" autocomplete="off">
+        <button type="button" onclick="searchStock()">Search</button>
     </form>
-    <div id="result"></div>
+
+    <div id="stockInfo">
+        <h2>Stock Information</h2>
+        <p><strong>Symbol:</strong> <span id="symbol"></span></p>
+        <p><strong>Current Price:</strong> $<span id="current_price"></span></p>
+    </div>
 
     <script>
-        var apiKey = 'H6POU8JVDEI52Y0K'; // Replace with your API key
+        function searchStock() {
+            const symbolInput = document.getElementById('stock_symbol');
+            const symbol = symbolInput.value;
 
-        $("#symbol").autocomplete({
-            source: function(request, response) {
-                var url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${request.term}&apikey=${apiKey}`;
-                fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    response($.map(data.bestMatches, function(item) {
-                        return {
-                            label: item['1. symbol'] + ' - ' + item['2. name'],
-                            value: item['1. symbol']
-                        };
-                    }));
-                });
-            },
-            minLength: 2
-        });
-
-        document.getElementById('stock-search-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            var symbol = document.getElementById('symbol').value;
             fetch('/api/stock/search', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ symbol: symbol })
+                body: JSON.stringify({ symbol }),
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
-                document.getElementById('result').innerHTML = 'Symbol: ' + data.symbol + ', Current Price: ' + data.current_price;
+                if ('error' in data) {
+                    console.error('Error:', data.error);
+                    // Handle error if needed
+                } else {
+                    document.getElementById('symbol').innerText = data.symbol;
+                    document.getElementById('current_price').innerText = data.current_price;
+                }
             })
             .catch(error => {
-                document.getElementById('result').innerHTML = 'Error: ' + error;
+                console.error('Error:', error);
             });
-        });
-    </script>
+        }
+    </script>    
 </body>
 </html>

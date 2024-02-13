@@ -61,6 +61,164 @@ class Post(db.Model):
             "image": self.image,
             "base64": str(file_encode)
         }
+    
+class House(db.Model):
+    _tablename_ = 'houses'
+    
+    # define the house schema with "vars" from object
+    id = db.Column(db.Integer, primary_key=True)
+
+    _price = db.Column(db.Numeric, nullable=False)
+    _beds = db.Column(db.Integer, nullable=False)
+    _baths = db.Column(db.Integer, nullable=False)
+    _address = db.Column(db.String(255), nullable=False)
+    _lat = db.Column(db.String(255), nullable=False)
+    _long = db.Column(db.String(255), nullable=False)
+    _sqfeet = db.Column(db.Integer, nullable=False)
+    _image = db.Column(db.String(255), nullable=False)
+    
+    
+    # constructor of a User object, initializes the instance variables within object (self)
+    def __init__(self,price,beds,baths, address, lat, long, sqfeet, image):
+        self._price = price
+        self._beds = beds
+        self._baths = baths
+        self._address = address
+        self._lat = lat
+        self._long = long
+        self._sqfeet = sqfeet
+        self._image = image
+        #fill rest
+# price
+    @property
+    def price(self):
+        return self._price
+    
+    @price.setter
+    def price(self,price):
+        self._price = price
+#beds
+    @property
+    def beds(self):
+        return self._beds
+    
+    @beds.setter
+    def beds(self,beds):
+        self._beds = beds
+#baths
+    @property
+    def baths(self):
+        return self._baths
+    
+    @baths.setter
+    def baths(self,baths):
+        self._baths = baths
+#address
+
+    @property
+    def address(self):
+        return self._address
+    
+    @address.setter
+    def address(self,address):
+        self._address = address
+#lat
+    @property
+    def lat(self):
+        return self._lat
+    
+    @lat.setter
+    def lat(self,lat):
+        self._lat = lat
+#long
+    
+    @property
+    def long(self):
+        return self._long
+    
+    @long.setter
+    def long(self,long):
+        self._long = long
+#sqfeet
+        
+    @property
+    def sqfeet(self):
+        return self._sqfeet
+    
+    @sqfeet.setter
+    def sqfeet(self,sqfeet):
+        self._sqfeet = sqfeet
+
+#image
+        
+    @property
+    def image(self):
+        return self._image
+    
+    @image.setter
+    def image(self,image):
+        self._image = image
+
+    
+    # output content using str(object) in human readable form, uses getter
+    # output content using json dumps, this is ready for API response
+    def __str__(self):
+        return json.dumps(self.read())
+    
+    # CRUD create/add a new record to the table
+    # returns self or None on error
+    def create(self):
+        try:
+            # creates a person object from User(db.Model) class, passes initializers
+            db.session.add(self)  # add prepares to persist person object to Users table
+            db.session.commit()  # SqlAlchemy "unit of work pattern" requires a manual commit
+            return self
+        except IntegrityError:
+            db.session.remove()
+            return None
+        
+     # CRUD update: updates user name, password, phone
+    # returns self
+    def update(self,price="",beds="", baths="", sqfeet="", address="", image=""):
+        """only updates values with length"""
+        if price != "":
+            self.price = price
+        if beds != "":
+            self.beds = beds
+        if baths != "":
+            self.baths = baths
+        if sqfeet != "":
+            self.sqfeet = sqfeet
+        if address != "":
+            self.address = address
+        if image != "":
+            self.image = image
+        db.session.commit()
+        return self
+    
+    # CRUD read converts self to dictionary
+    # returns dictionary
+    def read(self):
+        return {
+        "price": "$"+str(int(self.price)),
+        "beds": self.beds,
+        "baths": self.baths,
+        "address": self.address,
+        "lat": self.lat,
+        "long": self.long,
+        "sqfeet":self.sqfeet,
+        "image":self.image
+    }
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+        return None
+    # Builds working data for testing
+    def initUsers():
+        with app.app_context():
+            """Create database and tables"""
+            db.create_all()
 
 
 # Define the User class to manage actions in the 'users' table
@@ -78,21 +236,19 @@ class User(db.Model):
     _password = db.Column(db.String(255), unique=False, nullable=False)
     _dob = db.Column(db.Date)
     _pnum = db.Column(db.String(255), unique=False, nullable=True)
-    _email = db.Column(db.String(255), unique=True, nullable=True)
-    _role = db.Column(db.String(255), unique=False, nullable=True)
+    _role = db.Column(db.String(20), default="User", nullable=False)
     
     # Defines a relationship between User record and Notes table, one-to-many (one user to many notes)
     posts = db.relationship("Post", cascade='all, delete', backref='users', lazy=True)
 
     # constructor of a User object, initializes the instance variables within object (self)
-    def __init__(self, name, uid, pnum, email, role, password="123qwerty", dob=date.today()):
+    def __init__(self, name, uid, pnum, password="123qwerty", dob=date.today(), role="User"): #role="User"
         self._name = name
         self._uid = uid
         self.set_password(password)
         self._dob = dob
         self._pnum = pnum
-        self._email = email
-        self.role = role
+        self._role = role
 
     # a name getter method, extracts name from object
     @property
@@ -104,6 +260,16 @@ class User(db.Model):
     def name(self, name):
         self._name = name
     
+    @property
+    def role(self):
+        return self._role
+    
+    @role.setter
+    def role(self, role):
+        self._role = role
+
+    def is_admin(self):
+        return self._role == "Admin"
     # a getter method, extracts email from object
     @property
     def uid(self):
@@ -156,22 +322,6 @@ class User(db.Model):
     @pnum.setter
     def pnum(self, pnum):
         self._pnum = pnum
-
-    @property
-    def email(self):
-        return self._email
-    
-    @email.setter
-    def email(self, email):
-        self._email = email
-
-    @property
-    def role(self):
-        return self._role
-    
-    @role.setter
-    def role(self, role):
-        self._role = role
     
     # output content using str(object) in human readable form, uses getter
     # output content using json dumps, this is ready for API response
@@ -187,6 +337,7 @@ class User(db.Model):
             db.session.commit()  # SqlAlchemy "unit of work pattern" requires a manual commit
             return self
         except IntegrityError:
+            print(IntegrityError)
             db.session.remove()
             return None
 
@@ -200,14 +351,13 @@ class User(db.Model):
             "dob": self.dob,
             "age": self.age,
             "pnum": self.pnum,
-            "email": self.email,
-            "role": self.role,
+            "role": self.role, 
             "posts": [post.read() for post in self.posts]
         }
 
     # CRUD update: updates user name, password, phone
     # returns self
-    def update(self, name="", uid="", password="", pnum="", email="", role=""):
+    def update(self, name="", uid="", password="", pnum=""):
         """only updates values with length"""
         if len(name) > 0:
             self.name = name
@@ -217,10 +367,6 @@ class User(db.Model):
             self.set_password(password)
         if len(pnum) > 0:
             self.pnum = pnum
-        if len(email) > 0:
-            self.email = email
-        if len(role) > 0:
-            self.role = role
         db.session.commit()
         return self
 
@@ -240,5 +386,5 @@ def initUsers():
     with app.app_context():
         """Create database and tables"""
         db.create_all()
-
+        
             

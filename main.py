@@ -15,7 +15,8 @@ from __init__ import app, db, cors  # Definitions initialization
 # setup APIs
 from api.user import user_api # Blueprint import api definition
 from api.player import player_api
-from api.searchstocks import search_api
+from api.searchstocks import search_bp
+from api.house import house_api
 # database migrations
 from model.users import initUsers
 from model.players import initPlayers
@@ -39,7 +40,8 @@ db.init_app(app)
 app.register_blueprint(user_api) # register api routes
 app.register_blueprint(player_api)
 app.register_blueprint(app_projects) # register app pages
-app.register_blueprint(search_api)
+app.register_blueprint(search_bp)
+app.register_blueprint(house_api)
 
 @app.errorhandler(404)  # catch for URL not found
 def page_not_found(e):
@@ -57,6 +59,18 @@ def index():
 @app.route('/aws/')  # connects /about/ URL to about() function
 def aws():
     return render_template("aws.html")
+
+@app.route('/house/')
+def house():
+    return render_template("houses.html")
+
+@app.route('/house/house-details/')
+def housedetails():
+    return render_template("housedetails.html")
+
+@app.route('/house/edit-house/')
+def edithouse():
+    return render_template("edit-house.html")
 
 @app.route('/table/')  # connects /stub/ URL to stub() function
 def table():
@@ -76,39 +90,11 @@ def register():
         password = request.form.get('password')
         name = request.form.get('name')
         pnum = request.form.get('pnum')
-        email = request.form.get('email')
-        print(f"uid: {uid}, password: {password}, name: {name}, pnum: {pnum}, email: {email}")
+        print(f"uid: {uid}, password: {password}, name: {name}, pnum: {pnum})")
 
-        if not (uid and password and name and pnum and email):
+        if not (uid and password and name and pnum):
             flash('Please fill out all fields.')
             return redirect(url_for('register'))
-
-        # Check if the email is correctly formatted, else return an error
-        if '@' not in email or '.' not in email:
-            flash('Please enter a valid email address.')
-            return redirect(url_for('register'))
-
-        def send_email(email):
-            try:
-                msg = Message(
-                    'Registration Confirmation',
-                    sender='torindeanwolff@gmail.com',
-                    recipients=[email]
-                )
-                msg.body = 'Thank you for registering to Atlas Index!'
-                mail.send(msg)
-                app.logger.info(f"Email sent successfully to {email}")
-            except Exception as e:
-                app.logger.error(f"Error sending email to {email}: {str(e)}")
-
-
-        # Send an email
-        send_email(email)
-
-        # Redirect to a success page or do something else as needed
-        return redirect(url_for('index'))
-
-    return render_template('register.html', site=site)
 
 @app.route('/signin/', methods=['GET', 'POST'])
 def signin():
@@ -159,6 +145,8 @@ custom_cli = AppGroup('custom', help='Custom commands')
 def generate_data():
     initUsers()
     initPlayers()
+
+
 
 # Register the custom command group with the Flask application
 app.cli.add_command(custom_cli)
