@@ -1,0 +1,33 @@
+-- database: /instance/volumes/sqlite.db
+
+-- Use the ▷ button in the top right corner to run the entire file.
+
+SELECT * FROM players;
+
+DROP TABLE transactions;
+
+
+CREATE TABLE transactions (
+    transaction_id INT AUTO_INCREMENT PRIMARY KEY,
+    uid db.Column(db.String(255), unique=True, nullable=False),
+    amount VARCHAR(50) NOT NULL,
+    transaction_type VARCHAR(50)
+);
+
+
+-- database: /home/nandanv/vscode/atlasbackend/instance/volumes/sqlite.db
+
+-- Use the ▷ button in the top right corner to run the entire file.
+
+SELECT * FROM transactions
+ORDER BY `transaction_id` ASC;
+
+DROP TABLE transactions;
+
+
+CREATE TABLE transactions (
+    transaction_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(50) NOT NULL,
+    amount REAL NOT NULL,
+    transaction_type VARCHAR(50)
+);

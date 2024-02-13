@@ -31,27 +31,27 @@ def initHouses():
         # Load the CSV file into a DataFrame
         df = pd.read_csv(file_path)
 
-        try:
-            for index, row in df.iterrows():
-                try:
-                    # Extract the relevant data from each row
-                    price = float(row['PRICE']) if row['PRICE'] else 0
-                    beds = int(row['BEDS']) if row['BEDS'] else 0
-                    baths = int(row['BATHS']) if row['BATHS'] else 0
-                    address = row['ADDRESS']
-                    lat = row['LATITUDE']
-                    long = row['LONGITUDE']
-                    sqfeet = int(row['SQUARE FEET']) if row['SQUARE FEET'] else 0
+        for index, row in df.iterrows():
+            try:
+                # Extract the relevant data from each row
+                price = float(row['PRICE']) if row['PRICE'] else 0
+                beds = int(row['BEDS']) if row['BEDS'] else 0
+                baths = int(row['BATHS']) if row['BATHS'] else 0
+                address = row['ADDRESS']
+                lat = row['LATITUDE']
+                long = row['LONGITUDE']
+                sqfeet = int(row['SQUARE FEET']) if row['SQUARE FEET'] else 0
 
-                    # Create a House instance and add it to the session
+                # Create a House instance and add it to the session
+                try:
                     house = House(price, beds, baths, address, lat, long, sqfeet)
                     db.session.add(house)
                     db.session.commit()
-                except IntegrityError:
-                    '''fails with bad or duplicate data'''
-                    db.session.remove()
-                    print(f"Records exist, duplicate house, or error: {house.name}")
-                except Exception as e_inner:
-                    print(f"Error adding house at index {index}: {str(e_inner)}")
-        except Exception as e:
-            print(f"Error adding house at index {index}: {str(e)}")
+                except:
+                    continue
+            except IntegrityError:
+                '''fails with bad or duplicate data'''
+                db.session.remove()
+                print(f"Records exist, duplicate house, or error: {house.name}")
+            except Exception as e_inner:
+                print(f"Error adding house at index {index}: {str(e_inner)}")

@@ -79,7 +79,7 @@ class House(db.Model):
     
     
     # constructor of a User object, initializes the instance variables within object (self)
-    def __init__(self,price,beds,baths, address, lat, long, sqfeet, image):
+    def __init__(self,price,beds,baths, address, lat, long, sqfeet, image="image"):
         self._price = price
         self._beds = beds
         self._baths = baths

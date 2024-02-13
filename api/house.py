@@ -104,7 +104,7 @@ class HouseAPI:
                     print(body)
                     address = body.get('address')
                     houses = House.query.all()
-                    count = 0
+                    count = 1
                     for house in houses:
                         print(house.address,address)
                         if house.address == address:

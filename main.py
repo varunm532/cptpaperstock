@@ -6,6 +6,7 @@ from flask.cli import AppGroup
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_mail import Message
 from flask_mail import Mail
+from migrate import initHouses, initImages
 
 
 # import "packages" from "this" project
@@ -35,6 +36,7 @@ app.config['MAIL_USE_SSL'] = False
 mail = Mail(app)
 # Initialize the SQLAlchemy object to work with the Flask app instance
 db.init_app(app)
+
 
 # register URIs
 app.register_blueprint(user_api) # register api routes
