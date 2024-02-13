@@ -61,7 +61,231 @@ class Post(db.Model):
             "image": self.image,
             "base64": str(file_encode)
         }
+        
+class Transactions(db.Model):
+    _tablename_ = 'transactions'
+   
+    # define the stock schema with "vars" from object
+    id = db.Column(db.Integer, primary_key=True)
+    _uid = db.Column(db.String(255), unique=True, nullable=False)
+    _symbol = db.Column(db.String(255),unique=False,nullable=False)
+    _transaction_type = db.Column(db.String(255),unique=False,nullable=False)
+    _quantity = db.Column(db.String(255),unique=False,nullable=False)
+    _transaction_amount = db.Column(db.Integer, nullable=False)
+    _transaction_date = db.Column(db.Date)
+    # constructor of a User object, initializes the instance variables within object (self)
+
+    def _init_(self,uid,symbol,transaction_type,quantity,transaction_amount,transaction_date):
+        self._uid = uid
+        self._symbol = symbol
+        self._transaction_type = transaction_type
+        self._quantity = quantity
+        self._transaction_amount = transaction_amount
+        self._transaction_date = transaction_date
     
+    # uid
+    @property
+    def uid(self):
+        return self._uid
+    
+    @uid.setter
+    def uid(self,uid):
+        self._uid = uid
+        
+    # symbol
+    @property
+    def symbol(self):
+        return self._symbol
+    
+    @symbol.setter
+    def symbol(self,symbol):
+        self._symbol = symbol
+        
+    # transaction type
+    @property
+    def transaction_type(self):
+        return self._transaction_type
+    
+    @transaction_type.setter
+    def transaction_type(self,transaction_type):
+        self._transaction_type = transaction_type
+        
+    #quantity
+    @property
+    def quantity(self):
+        return self._quantity
+    
+    @quantity.setter
+    def quantity(self,quantity):
+        self._quantity = quantity
+        
+    #transaction amount
+    @property
+    def transaction_amount(self):
+        return self._transaction_amount
+    
+    @transaction_amount.setter
+    def transaction_amount(self,transaction_amount):
+        self._transaction_amount = transaction_amount
+        
+    # transaction
+    @property
+    def transaction_date(self):
+        transaction_date_string = self._transaction_date.strftime('%m-%d-%Y')
+        return transaction_date_string
+    
+    # dob should be have verification for type date
+    @transaction_date.setter
+    def dob(self, transaction_date):
+        self._transaction_date = transaction_date
+        
+     # output content using str(object) in human readable form, uses getter
+    # output content using json dumps, this is ready for API response
+    def __str__(self):
+        return json.dumps(self.read())
+    
+    # CRUD create/add a new record to the table
+    # returns self or None on error
+    def create(self):
+        try:
+            # creates a person object from User(db.Model) class, passes initializers
+            db.session.add(self)  # add prepares to persist person object to Users table
+            db.session.commit()  # SqlAlchemy "unit of work pattern" requires a manual commit
+            return self
+        except IntegrityError:
+            db.session.remove()
+            return None
+        
+    
+    # CRUD update: updates user name, password, phone
+    # returns self
+
+    def update(self,uid="",symbol="",transaction_type="",quantity="",transaction_amount=""):
+        """only updates values with length"""
+        if len(uid) > 0:
+            self.uid = uid
+        if len(symbol) > 0:
+            self.symbol = symbol
+        if len(transaction_type) > 0:
+            self.transaction_type = transaction_type
+        if len(quantity) > 0:
+            self.quantity = quantity
+        if len(transaction_amount) > 0:
+            self.transaction_amount = transaction_amount           
+        db.session.commit()
+        return self
+    
+    # CRUD read converts self to dictionary
+    # returns dictionary
+    def read(self):
+        return {
+            "id": self.id,
+            "symbol": self.symbol,
+            "transaction_type": self.transaction_type,
+            "quantity": self.quantity,
+            "transaction_amount": self.transaction_amount,
+            "transaction_date": self.transaction_date
+        }
+
+class Stocks(db.Model):
+    _tablename_ = 'stocks'
+    
+    # define the stock schema with "vars" from object
+    id = db.Column(db.Integer, primary_key=True)
+    _symbol = db.Column(db.String(255),unique=False,nullable=False)
+    _company = db.Column(db.String(255),unique=False,nullable=False)
+    _quantity = db.Column(db.Integer,unique=False,nullable=False)
+    _sheesh = db.Column(db.Integer,unique=False,nullable=False)
+    
+    # constructor of a User object, initializes the instance variables within object (self)
+    def _init_(self,symbol,company,quantity,sheesh):
+        self._symbol = symbol
+        self._company = company
+        self._quantity = quantity
+        self._sheesh = sheesh
+# symbol
+    @property
+    def symbol(self):
+        return self._symbol
+    
+    @symbol.setter
+    def symbol(self,symbol):
+        self._symbol = symbol
+#company
+    @property
+    def company(self):
+        return self._company
+    
+    @company.setter
+    def company(self,company):
+        self._company = company
+#quantity
+    @property
+    def quantity(self):
+        return self._quantity
+    
+    @quantity.setter
+    def quantity(self,quantity):
+        self._quantity = quantity
+
+#cost
+    @property
+    def sheesh(self):
+        return self._sheesh
+    
+    @sheesh.setter
+    def sheesh(self,sheesh):
+        self._sheesh = sheesh
+    
+    # output content using str(object) in human readable form, uses getter
+    # output content using json dumps, this is ready for API response
+    def __str__(self):
+        return json.dumps(self.read())
+    
+    # CRUD create/add a new record to the table
+    # returns self or None on error
+    def create(self):
+        try:
+            # creates a person object from User(db.Model) class, passes initializers
+            db.session.add(self)  # add prepares to persist person object to Users table
+            db.session.commit()  # SqlAlchemy "unit of work pattern" requires a manual commit
+            return self
+        except IntegrityError:
+            db.session.remove()
+            return None
+        
+     # CRUD update: updates user name, password, phone
+    # returns self
+    def update(self,symbol="",company="",quantity=None):
+        """only updates values with length"""
+        if len(symbol) > 0:
+            self.symbol = symbol
+        #if sheesh > 0:
+           # self.sheesh = sheesh
+        if len(company) > 0:
+            self.company = company
+        if quantity is not None:
+            self.quantity = quantity
+        
+        db.session.commit()
+        return self
+    
+    # CRUD read converts self to dictionary
+    # returns dictionary
+    def read(self):
+        return {
+            "id": self.id,
+            "symbol": self.symbol,
+            "company": self.company,
+            "quantity": self.quantity,
+            "sheesh": self.sheesh,
+        }
+    # Builds working data for testing
+    def initUsers():
+        with app.app_context():
+            """Create database and tables"""
+            db.create_all()
+
 class House(db.Model):
     _tablename_ = 'houses'
     

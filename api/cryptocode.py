@@ -6,6 +6,7 @@ from datetime import datetime
 from auth_middleware import token_required
 import random
 
+from flask_cors import CORS
 from model.users import User
 from model.crypto import Transaction
 import sqlite3
@@ -16,11 +17,15 @@ crypto_api = Blueprint('crypto_api', __name__,
 dbURI = './instance/volumes/sqlite.db'
 con = sqlite3.connect(dbURI)
 cur = con.cursor()
+app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
+CORS(app, origins=['http://127.0.0.1:8090'])
 
-# API docs https://flask-restful.readthedocs.io/en/latest/api.html
+
 api = Api(crypto_api)
+
 class CryptoAPI:        
-    class Transactions(Resource):  
+    class transactions(Resource):  
         # @token_required
         #current_price = 2
         increase_factor = 0.05
@@ -173,6 +178,6 @@ class CryptoAPI:
                 except Exception as e:
                     print(e)
                     return {'message': 'Something went wrong', 'error': str(e)}
-                
+                             
     # building RESTapi endpoint
-    api.add_resource(Transactions, '/transactions')
+    api.add_resource(transactions, '/api/crypto/transactions')  
