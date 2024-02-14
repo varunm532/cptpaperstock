@@ -8,8 +8,8 @@ from __init__ import app, db
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
 
-class Transaction(db.Model):
-    __tablename__ = 'transactions'
+class Transactions(db.Model):
+    __tablename__ = 'transaction'
     
     transaction_id = db.Column(db.Float,primary_key=True)
     user_id = db.Column(db.Float, db.ForeignKey('users.id'), nullable=False)
@@ -43,9 +43,9 @@ def init_data():
         db.create_all()
 
         transactions = [
-            Transaction(uid='azeemK', amount=10.5, transaction_type='buy'),
-            Transaction(uid='ahadB', amount=5.2, transaction_type='sell'),
-            Transaction(uid='akshatP', amount=8.7, transaction_type='buy')
+            Transactions(uid='azeemK', amount=10.5, transaction_type='buy'),
+            Transactions(uid='ahadB', amount=5.2, transaction_type='sell'),
+            Transactions(uid='akshatP', amount=8.7, transaction_type='buy')
             # Add more transactions as needed
         ]
 

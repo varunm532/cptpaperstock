@@ -5,7 +5,7 @@ from flask_restful import Api, Resource # used for REST API building
 from datetime import datetime
 from auth_middleware import token_required
 from model.users import User, Stocks
-from auth_middleware1 import token_required1
+#from auth_middleware1 import token_required1
 import sqlite3
 from __init__ import app, db, cors, dbURI
 
