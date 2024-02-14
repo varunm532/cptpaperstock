@@ -144,6 +144,8 @@ class UserAPI:
                 if uid is None:
                     return {'message': f'User ID is missing'}, 400
                 password = body.get('password')
+                if password is None:
+                    return {'message': f'Password is missing'}, 400
                 
                 ''' Find user '''
                 user = User.query.filter_by(_uid=uid).first()
