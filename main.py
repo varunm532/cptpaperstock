@@ -16,7 +16,7 @@ from __init__ import app, db, cors  # Definitions initialization
 # setup APIs
 from api.user import user_api # Blueprint import api definition
 from api.player import player_api
-from api.searchstocks import search_bp
+from api.searchstocks import search_api
 from api.house import house_api
 # database migrations
 from model.users import initUsers
@@ -42,7 +42,7 @@ db.init_app(app)
 app.register_blueprint(user_api) # register api routes
 app.register_blueprint(player_api)
 app.register_blueprint(app_projects) # register app pages
-app.register_blueprint(search_bp)
+app.register_blueprint(search_api)
 app.register_blueprint(house_api)
 
 @app.errorhandler(404)  # catch for URL not found
@@ -136,8 +136,16 @@ def display():
 def before_request():
     # Check if the request came from a specific origin
     allowed_origin = request.headers.get('Origin')
-    if allowed_origin in ['http://localhost:4100', 'http://127.0.0.1:4100', 'https://nighthawkcoders.github.io', 'http://localhost:8086', 'http://localhost:8090', 'http://127.0.0.1:8090', 'http://127.0.0.1:8090']:
+    if allowed_origin in ['http://localhost:8090']:
         cors._origins = allowed_origin
+
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8090')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
 
 # Create an AppGroup for custom commands
 custom_cli = AppGroup('custom', help='Custom commands')
