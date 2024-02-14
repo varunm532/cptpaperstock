@@ -8,7 +8,8 @@ import random
 
 from flask_cors import CORS
 from model.users import User
-from model.crypto import Transaction
+from model.crypto import Transactions
+
 import sqlite3
 
 crypto_api = Blueprint('crypto_api', __name__,
@@ -18,8 +19,8 @@ dbURI = './instance/volumes/sqlite.db'
 con = sqlite3.connect(dbURI)
 cur = con.cursor()
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
-CORS(app, origins=['http://127.0.0.1:8090'])
+CORS(app)  # Enable CORS for all routes 
+CORS(app, origins=['http://127.0.0.1:8090']) 
 
 
 api = Api(crypto_api)
@@ -81,8 +82,9 @@ class CryptoAPI:
                 print(amount)
                 
                 con = sqlite3.connect(dbURI)
+                print("After connecting to db")
                 cur = con.cursor()
-                res = cur.execute("SELECT ifnull(sum(case transaction_type when 'buy' then amount else -amount END),0) FROM transactions")
+                res = cur.execute("SELECT ifnull(sum(case transaction_type when 'buy' then amount else -amount END),0) FROM `transaction`")
                 #print(len(res.fetchall()))
                 total_crypto_coins=res.fetchone()[0]              
                 #print(total_crypto_coins)
@@ -103,7 +105,7 @@ class CryptoAPI:
                 
                 print(user.id)
                 cur = con.cursor()
-                res = cur.execute("SELECT ifnull(sum(case transaction_type when 'buy' then amount else -amount END),0) FROM transactions where user_id="+str(user.id))
+                res = cur.execute("SELECT ifnull(sum(case transaction_type when 'buy' then amount else -amount END),0) FROM `transaction` where user_id="+str(user.id))
                 current_user_tokens=res.fetchone()[0] 
                 print("USER TOKEN")
                 print(current_user_tokens)
@@ -148,7 +150,7 @@ class CryptoAPI:
 
                 # Save the updated user information
                 
-                p = Transaction(user.id,amount,transaction_type,self.current_price)
+                p = Transactions(user.id,amount,transaction_type,self.current_price)
                 p.create()
 
                 return {
@@ -180,4 +182,4 @@ class CryptoAPI:
                     return {'message': 'Something went wrong', 'error': str(e)}
                              
     # building RESTapi endpoint
-    api.add_resource(transactions, '/api/crypto/transactions')  
+    api.add_resource(transactions, '/transactions')  
