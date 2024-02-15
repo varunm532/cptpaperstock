@@ -33,7 +33,7 @@ from projects.projects import app_projects # Blueprint directory import projects
 db.init_app(app)
 
 CORS(app)
-CORS(app, origins=['https://atlas.stu.nighthawkcodingsociety.com/', 'http://localhost:8086'])
+CORS(app, origins=['*', 'http://localhost:8086'])
 
 
 # register URIs
@@ -137,7 +137,7 @@ def display():
 def before_request():
     # Check if the request came from a specific origin
     allowed_origin = request.headers.get('Origin')
-    if allowed_origin in ['https://atlas.stu.nighthawkcodingsociety.com', 'http://localhost:8086']:
+    if allowed_origin in ['*', 'http://localhost:8086']:
         cors._origins = allowed_origin
 
 @app.after_request

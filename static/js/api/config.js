@@ -10,7 +10,7 @@ if (location.hostname === "127.0.0.1") {
 export const options = {
     method: 'GET', // *GET, POST, PUT, DELETE, etc.
     mode: 'same-origin', // no-cors, *cors, same-origin
-    origin: 'https://atlas.stu.nighthawkcodingsociety.com',
+    origin: '*',
     cache: 'default', // *default, no-cache, reload, force-cache, only-if-cached
     credentials: 'include', // include, same-origin, omit
     headers: {

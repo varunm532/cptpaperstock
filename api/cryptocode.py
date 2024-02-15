@@ -20,7 +20,7 @@ con = sqlite3.connect(dbURI)
 cur = con.cursor()
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes 
-CORS(app, origins=['https://atlas.stu.nighthawkcodingsociety.com']) 
+CORS(app, origins=['*']) 
 
 
 api = Api(crypto_api)
