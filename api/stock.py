@@ -223,16 +223,52 @@ class StocksAPI(Resource):
             #ta.create()   
             #db.session.commit()
     class _Transactionsdisplayuser(Resource):
-        #@token_required1("Admin")
         def post(self):
-            body =request.get_json()
+            body = request.get_json()
             uid = body.get('uid')
-            return uid
+            print(uid)
+            # Save uid as an instance variable to access it in other methods
+            self.uid = uid
+            transactions = Stock_Transactions.query.all()
+            json_ready = [transaction.read() for transaction in transactions]
             
-        def get(self):
-            transaction = Stock_Transactions.query.all()
-            json_ready = [transactions.read() for transactions in transaction]
-            return jsonify(item for item in json_ready if item.get('uid') == post.uid)         
+            # Filter transactions based on uid
+            filtered_transactions = [item for item in json_ready if item.get('uid') == uid]
+            print("test")
+            print(json_ready)
+            return jsonify(filtered_transactions)
+    class _Stockmoney(Resource):
+        def post(self):
+            body = request.get_json()
+            uid = body.get('uid')
+            print (uid)
+            users = User.query.all()
+            json_ready = [user.read() for user in users]
+            
+            # Filter transactions based on uid
+            filtered_transactions = [item for item in json_ready if item.get('uid') == uid]
+            print("test")
+            print(filtered_transactions[0]['stockmoney'])
+            return jsonify(filtered_transactions[0]['stockmoney'])
+    #class _Portfolio(Resource):
+    #    def post(self):
+    #        body = request.get_json()
+    #        uid = body.get('uid')
+    #        conn=sqlite3.connect('instance/volumes/sqlite.db')
+    #        cur=conn.cursor()
+    #        body = request.get_json()
+    #        quantity = body.get('newquantity')
+    #        symbol = body.get('symbol')
+    #        update_query = "UPDATE stocks SET _quantity = ? WHERE _symbol = ?"
+    #        #updatedstocks = Stocks.read() in symbol - symbols
+    #        #Stocks.update(update_query, (quantity, symbol))
+    #        cur.execute(update_query,(quantity,symbol))
+    #        conn.commit()
+    #        cur.close()
+            
+            
+                
+        
             
 
             
@@ -243,6 +279,7 @@ class StocksAPI(Resource):
     api.add_resource(_Transactionsdisplay, '/transaction/displayadmin')
     api.add_resource(_Transactionsdisplayuser, '/transaction/display')
     api.add_resource(_Transaction2, '/transaction')
+    api.add_resource(_Stockmoney, '/stockmoney')
 
 
             

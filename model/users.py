@@ -168,6 +168,7 @@ class Stock_Transactions(db.Model):
     def read(self):
         return {
             "id": self.id,
+            "uid": self.uid,
             "symbol": self.symbol,
             "transaction_type": self.transaction_type,
             "quantity": self.quantity,
