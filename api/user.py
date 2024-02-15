@@ -167,7 +167,7 @@ class UserAPI:
                         resp.set_cookie("jwt", token,
                                 max_age=3600,
                                 secure=True,
-                                httponly=True,
+                                #httponly=True,
                                 path='/',
                                 samesite='None'  # This is the key part for cross-site requests
 

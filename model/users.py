@@ -390,7 +390,7 @@ class House(db.Model):
         
      # CRUD update: updates user name, password, phone
     # returns self
-    def update(self,price="",beds="", baths="", sqfeet="", address="", image=""):
+    def update(self,price="",beds="", baths="", sqft="", address="", image=""):
         """only updates values with length"""
         if price != "":
             self.price = price
@@ -398,8 +398,8 @@ class House(db.Model):
             self.beds = beds
         if baths != "":
             self.baths = baths
-        if sqfeet != "":
-            self.sqfeet = sqfeet
+        if sqft != "":
+            self.sqfeet = sqft
         if address != "":
             self.address = address
         if image != "":
@@ -455,7 +455,7 @@ class User(db.Model):
     posts = db.relationship("Post", cascade='all, delete', backref='users', lazy=True)
 
     # constructor of a User object, initializes the instance variables within object (self)
-    def __init__(self, name, uid,stockmoney, pnum, password="123qwerty", dob=date.today(), role="User"): #role="User"
+    def __init__(self, name, uid, pnum, stockmoney, password="123qwerty", dob=date.today(), role="User"): #role="User"
         self._name = name
         self._uid = uid
         self._stockmoney = stockmoney
@@ -581,7 +581,7 @@ class User(db.Model):
 
     # CRUD update: updates user name, password, phone
     # returns self
-    def update(self, name="", uid="", password="", pnum="",stockmoney =''):
+    def update(self, name="", uid="", password="", pnum="", stockmoney=""):
         """only updates values with length"""
         if len(name) > 0:
             self.name = name

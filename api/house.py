@@ -78,19 +78,47 @@ class HouseAPI:
                 else:
                     return "err"
         
+        @token_required
         def put(self):
-            body = request.get_json() # get the body of the request
-            price = body.get("price")
-            beds = body.get("beds")
-            baths = body.get("baths")
-            address = body.get("address")
-            sqfeet = body.get("sqfeet")
-            house = House.query.get(address) # get the player (using the uid in this case)
-            house.update(price = price, beds = beds, baths = baths, sqfeet = sqfeet)
-            return f"{house.read()} Updated"
-
+            token = request.cookies.get("jwt")
+            if not token:
+                return {
+                    "message": "Authentication Token is missing!",
+                    "data": None,
+                    "error": "Unauthorized"
+                }, 401
+            try:
+                data=jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
+                if data["role"] == "Admin":
+                    body = request.get_json()
+                    address = body.get('address')
+                    price = body.get('price')
+                    beds = body.get('beds')
+                    baths = body.get('baths')
+                    sqft = body.get('sqft')
+                    houses = House.query.all()
+                    for house in houses:
+                        if house.address == address:
+                            house.update(price = price if price else "", beds = beds if beds else "", baths = baths if baths else "", sqft = sqft if sqft else "")
+                            return f"Updated {address}"
+                    return f"house not found"
+                else: 
+                    return {
+                    "message": "Not an admin!",
+                    "data": None,
+                    "error": "Unauthorized"
+                }, 401
+            except Exception as e:
+                return {
+                    "message": "Something went wrong",
+                    "data": None,
+                    "error": str(e)
+                }, 500
+        
+        @token_required
         def delete(self):
             token = request.cookies.get("jwt")
+            print(token)
             if not token:
                 return {
                     "message": "Authentication Token is missing!",
