@@ -4,8 +4,6 @@ import threading
 from flask import render_template,request  # import render_template from "public" flask libraries
 from flask.cli import AppGroup
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_mail import Message
-from flask_mail import Mail
 from migrate import initHouses, initImages
 from flask_cors import CORS
 
@@ -30,14 +28,7 @@ from model.crypto import Transactions
 from projects.projects import app_projects # Blueprint directory import projects definition
 
 
-app.config['MAIL_SERVER']='smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USERNAME'] = 'torindeanwolff@gmail.com'
-app.config['MAIL_PASSWORD'] = 'dslo bpmz hzwv tvnn'
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
 
-mail = Mail(app)
 # Initialize the SQLAlchemy object to work with the Flask app instance
 db.init_app(app)
 
