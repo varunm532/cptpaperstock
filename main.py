@@ -137,7 +137,7 @@ def display():
 def before_request():
     # Check if the request came from a specific origin
     allowed_origin = request.headers.get('Origin')
-    if allowed_origin in ['*', 'http://localhost:8086']:
+    if allowed_origin in ['*', '*']:
         cors._origins = allowed_origin
 
 @app.after_request
