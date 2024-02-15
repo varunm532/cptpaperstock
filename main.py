@@ -33,7 +33,7 @@ from projects.projects import app_projects # Blueprint directory import projects
 db.init_app(app)
 
 CORS(app)
-CORS(app, origins=['http://127.0.0.1:8090', 'http://localhost:8086'])
+CORS(app, origins=['https://atlas.stu.nighthawkcodingsociety.com/', 'http://localhost:8086'])
 
 
 # register URIs
