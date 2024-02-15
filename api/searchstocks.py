@@ -18,7 +18,7 @@ import base64
 
 
 
-from model.users import Stocks,User,Transactions
+from model.users import Stocks,User,Stock_Transactions
 
 search_api = Blueprint('search_api', __name__,
                    url_prefix='/api/stock')
