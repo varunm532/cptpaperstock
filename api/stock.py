@@ -5,6 +5,7 @@ from flask_restful import Api, Resource # used for REST API building
 from datetime import datetime
 from auth_middleware import token_required
 from model.users import User, Stocks, Stock_Transactions
+from sqlalchemy import func
 #from auth_middleware1 import token_required1
 import sqlite3
 from __init__ import app, db, cors, dbURI
@@ -244,16 +245,31 @@ class StocksAPI(Resource):
             print (uid)
             users = User.query.all()
             json_ready = [user.read() for user in users]
-            
-            # Filter transactions based on uid
+        # Filter transactions based on uid
             filtered_transactions = [item for item in json_ready if item.get('uid') == uid]
             print("test")
             print(filtered_transactions[0]['stockmoney'])
             return jsonify(filtered_transactions[0]['stockmoney'])
-    #class _Portfolio(Resource):
-    #    def post(self):
-    #        body = request.get_json()
-    #        uid = body.get('uid')
+    class _Portfolio(Resource):
+        def post(self):
+            body = request.get_json()
+            uid = body.get('uid')
+            result = db.session.query(
+                Stock_Transactions._symbol.label("SYMBOL"),
+                func.sum(Stock_Transactions._quantity).label("TOTAL_QNTY"),
+                func.sum(Stock_Transactions._transaction_amount).label("VALUE")
+                ).filter(Stock_Transactions._uid == uid).group_by(Stock_Transactions._symbol).all()
+            print(result)
+            portfolio_data = [
+                {
+                    "SYMBOL": row.SYMBOL,
+                    "TOTAL_QNTY": row.TOTAL_QNTY,
+                    "VALUE": row.VALUE
+                }
+                for row in result
+            ]
+            #return jsonify({"portfolio": portfolio_data}), 200
+            return {"portfolio": portfolio_data}, 200
     #        conn=sqlite3.connect('instance/volumes/sqlite.db')
     #        cur=conn.cursor()
     #        body = request.get_json()
@@ -280,6 +296,7 @@ class StocksAPI(Resource):
     api.add_resource(_Transactionsdisplayuser, '/transaction/display')
     api.add_resource(_Transaction2, '/transaction')
     api.add_resource(_Stockmoney, '/stockmoney')
+    api.add_resource(_Portfolio, '/portfolio')
 
 
             
