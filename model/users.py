@@ -592,7 +592,7 @@ class User(db.Model):
             self.set_password(password)
         if len(pnum) > 0:
             self.pnum = pnum
-        if stockmoney is '':
+        if stockmoney == '':
             self.stockmoney = stockmoney
         db.session.commit()
         return self
