@@ -7,6 +7,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_mail import Message
 from flask_mail import Mail
 from migrate import initHouses, initImages
+from flask_cors import CORS
 
 
 # import "packages" from "this" project
@@ -39,6 +40,9 @@ app.config['MAIL_USE_SSL'] = False
 mail = Mail(app)
 # Initialize the SQLAlchemy object to work with the Flask app instance
 db.init_app(app)
+
+CORS(app)
+CORS(app, origins=['http://127.0.0.1:8090', 'http://localhost:8086'])
 
 
 # register URIs
@@ -142,12 +146,11 @@ def display():
 def before_request():
     # Check if the request came from a specific origin
     allowed_origin = request.headers.get('Origin')
-    if allowed_origin in ['http://localhost:8090']:
+    if allowed_origin in ['http://127.0.0.1:8090', 'http://localhost:8086']:
         cors._origins = allowed_origin
 
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8090')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     response.headers.add('Access-Control-Allow-Credentials', 'true')

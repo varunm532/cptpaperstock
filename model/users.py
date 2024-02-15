@@ -62,26 +62,24 @@ class Post(db.Model):
             "base64": str(file_encode)
         }
         
-class Transactions(db.Model):
-    _tablename_ = 'transactions'
+class Stock_Transactions(db.Model):
+    __tablename__ = 'stock_transactions'
    
     # define the stock schema with "vars" from object
     id = db.Column(db.Integer, primary_key=True)
-    _uid = db.Column(db.String(255), unique=True, nullable=False)
+    _uid = db.Column(db.String(255), unique=False, nullable=False)
     _symbol = db.Column(db.String(255),unique=False,nullable=False)
     _transaction_type = db.Column(db.String(255),unique=False,nullable=False)
     _quantity = db.Column(db.String(255),unique=False,nullable=False)
     _transaction_amount = db.Column(db.Integer, nullable=False)
-    _transaction_date = db.Column(db.Date)
     # constructor of a User object, initializes the instance variables within object (self)
 
-    def _init_(self,uid,symbol,transaction_type,quantity,transaction_amount,transaction_date):
+    def _init_(self,uid,symbol,transaction_type,quantity,transaction_amount):
         self._uid = uid
         self._symbol = symbol
         self._transaction_type = transaction_type
         self._quantity = quantity
         self._transaction_amount = transaction_amount
-        self._transaction_date = transaction_date
     
     # uid
     @property
@@ -128,16 +126,6 @@ class Transactions(db.Model):
     def transaction_amount(self,transaction_amount):
         self._transaction_amount = transaction_amount
         
-    # transaction
-    @property
-    def transaction_date(self):
-        transaction_date_string = self._transaction_date.strftime('%m-%d-%Y')
-        return transaction_date_string
-    
-    # dob should be have verification for type date
-    @transaction_date.setter
-    def dob(self, transaction_date):
-        self._transaction_date = transaction_date
         
      # output content using str(object) in human readable form, uses getter
     # output content using json dumps, this is ready for API response
@@ -183,8 +171,7 @@ class Transactions(db.Model):
             "symbol": self.symbol,
             "transaction_type": self.transaction_type,
             "quantity": self.quantity,
-            "transaction_amount": self.transaction_amount,
-            "transaction_date": self.transaction_date
+            "transaction_amount": self.transaction_amount
         }
 
 class Stocks(db.Model):
@@ -461,14 +448,17 @@ class User(db.Model):
     _dob = db.Column(db.Date)
     _pnum = db.Column(db.String(255), unique=False, nullable=True)
     _role = db.Column(db.String(20), default="User", nullable=False)
+    _stockmoney = db.Column(db.Integer, unique=False, nullable=False)
+
     
     # Defines a relationship between User record and Notes table, one-to-many (one user to many notes)
     posts = db.relationship("Post", cascade='all, delete', backref='users', lazy=True)
 
     # constructor of a User object, initializes the instance variables within object (self)
-    def __init__(self, name, uid, pnum, password="123qwerty", dob=date.today(), role="User"): #role="User"
+    def __init__(self, name, uid,stockmoney, pnum, password="123qwerty", dob=date.today(), role="User"): #role="User"
         self._name = name
         self._uid = uid
+        self._stockmoney = stockmoney
         self.set_password(password)
         self._dob = dob
         self._pnum = pnum
@@ -483,6 +473,15 @@ class User(db.Model):
     @name.setter
     def name(self, name):
         self._name = name
+    
+    @property
+    def stockmoney(self):
+        return self._stockmoney
+    
+    # a setter function, allows name to be updated after initial object creation
+    @stockmoney.setter
+    def stockmoney(self, stockmoney):
+        self._stockmoney = stockmoney
     
     @property
     def role(self):
@@ -572,6 +571,7 @@ class User(db.Model):
             "id": self.id,
             "name": self.name,
             "uid": self.uid,
+            "stockmoney": self.stockmoney,
             "dob": self.dob,
             "age": self.age,
             "pnum": self.pnum,
@@ -581,7 +581,7 @@ class User(db.Model):
 
     # CRUD update: updates user name, password, phone
     # returns self
-    def update(self, name="", uid="", password="", pnum=""):
+    def update(self, name="", uid="", password="", pnum="",stockmoney =''):
         """only updates values with length"""
         if len(name) > 0:
             self.name = name
@@ -591,6 +591,8 @@ class User(db.Model):
             self.set_password(password)
         if len(pnum) > 0:
             self.pnum = pnum
+        if stockmoney is '':
+            self.stockmoney = stockmoney
         db.session.commit()
         return self
 

@@ -9,11 +9,16 @@ from datetime import datetime
 from auth_middleware import token_required
 import sqlite3
 from __init__ import app, db, cors, dbURI
+import matplotlib
+matplotlib.use('Agg')  # Use the Agg backend
+from matplotlib import pyplot as plt
+from io import BytesIO
+import base64
 
 
 
 
-from model.users import Stocks,User,Transactions
+from model.users import Stocks,User,Stock_Transactions
 
 search_api = Blueprint('search_api', __name__,
                    url_prefix='/api/stock')
@@ -71,13 +76,46 @@ class SearchAPI(Resource):
             except Exception as e:
                 return jsonify('Error Occured')
             
-            
-        
     api.add_resource(search_stock, '/search')
 
+    class HistoricalData(Resource):
+        def post(self):
+            try: 
+                data = request.get_json()
+                symbol = data['symbol']
 
-            
-        
-    
-        
-        
+                # Make a request to the FMP API to get historical data
+                api_key = '034ce1b9ccc7ac857fc59ec5665cfc5e'  # Replace with your FMP API key
+                url = f'https://financialmodelingprep.com/api/v3/historical-price-full/{symbol}?apikey={api_key}'
+                response = requests.get(url)
+                historical_data = response.json()
+
+                # Extract the dates and prices from the historical data
+                dates = [item['date'] for item in historical_data['historical']]
+                prices = [item['close'] for item in historical_data['historical']]
+
+                # Create a plot
+                plt.figure(figsize=(10,5))
+                plt.plot(dates, prices)
+                plt.title(f'Historical Data for {symbol}')
+                plt.xlabel('Date')
+                plt.ylabel('Close Price')
+                plt.grid(True)
+                plt.tight_layout()
+
+                # Save it to a BytesIO object
+                buf = BytesIO()
+                plt.savefig(buf, format='png')
+                buf.seek(0)
+
+                # Convert plot to a base64 string
+                image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+                buf.close()
+
+                print(image_base64)
+
+                return jsonify({'image': image_base64})
+            except Exception as e:
+                return jsonify('Error Occured')
+
+    api.add_resource(HistoricalData, '/historical')    
