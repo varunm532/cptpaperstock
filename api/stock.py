@@ -5,10 +5,15 @@ from flask_restful import Api, Resource # used for REST API building
 from datetime import datetime
 from auth_middleware import token_required
 from model.users import User, Stocks, Stock_Transactions
-from sqlalchemy import func
+from sqlalchemy import func, case
 #from auth_middleware1 import token_required1
 import sqlite3
 from __init__ import app, db, cors, dbURI
+import requests
+import matplotlib.pyplot as plt
+from io import BytesIO
+import base64
+
 
 
 
@@ -22,8 +27,32 @@ api = Api(stocks_api)
 class StocksAPI(Resource):
     class _Displaystock(Resource):
         #@token_required1("Admin")
+        
         def get(self):
-            stocks = Stocks.query.all()
+            #updates stock price:
+            stocks = Stocks.query.all()  
+            api_key = '034ce1b9ccc7ac857fc59ec5665cfc5e'  # Replace with your FMP API key
+            for stock in stocks:
+                symbol = stock.symbol
+                url = f'https://financialmodelingprep.com/api/v3/quote/{symbol}?apikey={api_key}'
+                response = requests.get(url)
+
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    if data:  # Check if the list is not empty
+                        latest_price = data[0].get('price')  # Use .get() to avoid KeyError
+                        if latest_price is not None:
+                            stock.sheesh = latest_price
+                            db.session.commit()
+                            print(f"Updated price for {symbol} to {latest_price}")
+                        else:
+                            print(f"Price data not found for {symbol}")
+                    else:
+                        print(f"Empty data for {symbol}")
+                else:
+                    print(f"Failed to fetch data for {symbol}. Status code: {response.status_code}")                          
+            #displays database data:
             json_ready = [stock.read() for stock in stocks]
             return jsonify(json_ready)
     class _Transactionsdisplay(Resource):
@@ -194,12 +223,13 @@ class StocksAPI(Resource):
                 #User.update(stockmoney=updatedusermoney)
                 db.session.commit()
                 ## creates log for transaction
-                transactionamount = currentstockmoney*quantitytobuy
+                transactionamount = (currentstockmoney*quantitytobuy)
                 db.session.commit()
                 Inst_table = Stock_Transactions(uid=uid, symbol=symbol,transaction_type=transactiontype, quantity=quantitytobuy, transaction_amount=transactionamount)
                 print(Inst_table)
                 Inst_table.create()   
                 db.session.commit()
+
             else:
                 return jsonify({'error': 'Insufficient funds'}), 400
                 
@@ -259,7 +289,7 @@ class StocksAPI(Resource):
                 func.sum(Stock_Transactions._quantity).label("TOTAL_QNTY"),
                 func.sum(Stock_Transactions._transaction_amount).label("VALUE")
                 ).filter(Stock_Transactions._uid == uid).group_by(Stock_Transactions._symbol).all()
-            print(result)
+            print(result[0][1])
             portfolio_data = [
                 {
                     "SYMBOL": row.SYMBOL,
@@ -281,7 +311,235 @@ class StocksAPI(Resource):
     #        cur.execute(update_query,(quantity,symbol))
     #        conn.commit()
     #        cur.close()
+    #class _Portfolio2(Resource):
+    #    def post(self):
+    #        body = request.get_json()
+    #        uid = body.get('uid')
+    #        result = db.session.query(
+    #            Stock_Transactions._symbol.label("SYMBOL"),
+    #            func.sum(Stock_Transactions._quantity).label("TOTAL_QNTY"),
+    #            #func.sum(Stock_Transactions._quantity * Stocks.query.filter(Stocks._symbol).value(Stocks._sheesh)).label("VALUE"),
+    #           (func.sum(Stock_Transactions._quantity * Stocks._sheesh)).label("VALUE"),
+    #            ).join(Stocks, Stocks._symbol == Stock_Transactions._symbol) \
+    #            .filter(Stock_Transactions._uid == uid).group_by(Stock_Transactions._symbol).having(func.sum(Stock_Transactions._quantity) > 0) .all()
+#
+    #        print(result)
+    #        portfolio_data = [
+    #            {
+    #                "SYMBOL": row.SYMBOL,
+    #                "TOTAL_QNTY": row.TOTAL_QNTY,
+    #                "VALUE": row.VALUE
+    #            }
+    #            for row in result
+    #        ]
+    #        #return jsonify({"portfolio": portfolio_data}), 200
+    #        return {"portfolio": portfolio_data}, 200
+    class _Portfolio2(Resource):
+        def post(self):
+            body = request.get_json()
+            uid = body.get('uid')
+
+            result = db.session.query(
+                Stock_Transactions._symbol.label("SYMBOL"),
+                (func.sum(case([(Stock_Transactions._transaction_type == 'buy', Stock_Transactions._quantity)], else_=0)) -
+                func.sum(case([(Stock_Transactions._transaction_type == 'sell', Stock_Transactions._quantity)], else_=0))
+                ).label("TOTAL_QNTY"),
+                ((func.sum(case([(Stock_Transactions._transaction_type == 'buy', Stock_Transactions._quantity)], else_=0)) -
+                func.sum(case([(Stock_Transactions._transaction_type == 'sell', Stock_Transactions._quantity)], else_=0))) *
+                (Stocks.query.filter(Stocks._symbol == Stock_Transactions._symbol).value(Stocks._sheesh))
+                ).label("VALUE"),
+                ).join(Stocks, Stocks._symbol == Stock_Transactions._symbol).filter(Stock_Transactions._uid == uid).group_by(Stock_Transactions._symbol).having(func.sum(case([(Stock_Transactions._transaction_type == 'buy', Stock_Transactions._quantity)],
+               #.having(func.sum(Stock_Transactions._quantity) > 0) \
             
+         else_=-Stock_Transactions._quantity)
+                ) > 0).all()
+            print("This is Result")
+            print(result)
+            for row in result:
+                print(f"Symbol: {row.SYMBOL}, Total Quantity: {row.TOTAL_QNTY}, Value: {row.VALUE}")
+
+            portfolio_data = [
+                {
+                    "SYMBOL": row.SYMBOL,
+                    "TOTAL_QNTY": row.TOTAL_QNTY,
+                    "VALUE": row.VALUE
+                }
+                for row in result
+            ]
+            return {"portfolio": portfolio_data}, 200
+
+
+    class _SellTransaction(Resource):
+        def post(self):
+            body = request.get_json()
+            return self.process_sell_transaction(body)
+
+        def process_sell_transaction(self, body):
+            quantity_to_sell = body.get('quantity')
+            uid = body.get('uid')
+            symbol = body.get('symbol')
+
+            stocks = Stocks.query.filter_by(_symbol=symbol).first()
+            user = User.query.filter_by(_uid=uid).first()
+
+            if not stocks or not user:
+                return jsonify({'error': 'Symbol or User not found'}), 404
+
+            if stocks._quantity < quantity_to_sell:
+                return jsonify({'error': 'Insufficient stocks to sell'}), 400
+
+            sell_price = stocks._sheesh  # Assuming sell price is the current stock price
+            transaction_amount = quantity_to_sell * sell_price
+
+            # Update stocks quantity
+            stocks._quantity -= quantity_to_sell
+            db.session.commit()
+
+            # Update user's stockmoney
+            user._stockmoney += transaction_amount
+            db.session.commit()
+
+            # Create transaction log
+            Inst_table = Stock_Transactions(
+                uid=uid,
+                symbol=symbol,
+                transaction_type='sell',
+                quantity=quantity_to_sell,
+                transaction_amount=transaction_amount
+            )
+            db.session.add(Inst_table)
+            db.session.commit()
+            return jsonify({'message': 'Sell transaction successful'}), 200
+    class _SellStock(Resource):
+        def post(self):
+            # getting key variables from frontend
+            body = request.get_json()
+            symbol = body.get('symbol')
+            uid = body.get('uid')
+            quantity = body.get('quantity')
+            #other variables:
+            transactiontype = 'sell'
+            #SQL taking data from transation table
+            result = db.session.query(
+                Stock_Transactions._symbol.label("SYMBOL"),
+                (func.sum(case([(Stock_Transactions._transaction_type == 'buy', Stock_Transactions._quantity)], else_=0)) -
+                func.sum(case([(Stock_Transactions._transaction_type == 'sell', Stock_Transactions._quantity)], else_=0))
+                ).label("TOTAL_QNTY"),
+                (func.sum(Stock_Transactions._quantity * Stocks._sheesh)).label("VALUE"),
+            ).join(Stocks, Stocks._symbol == Stock_Transactions._symbol) \
+            .filter(Stock_Transactions._uid == uid, Stock_Transactions._symbol == symbol) \
+            .group_by(Stock_Transactions._symbol) \
+            .all()
+            print(result[0][1])
+            ownedstock = result[0][1]
+            print(ownedstock)
+            #logic for selling stock
+            if (ownedstock >= quantity):
+                #logic for transaction log
+                sellquantity = -quantity
+                stocks = Stocks.query.all()
+                json_ready = [stock.read() for stock in stocks]
+                list1 = [item for item in json_ready if item.get('symbol') == symbol]
+                currentprice = list1[0]['sheesh']
+                transactionamount = currentprice*quantity
+                Inst_table = Stock_Transactions(uid=uid, symbol=symbol,transaction_type=transactiontype, quantity=quantity, transaction_amount=transactionamount)
+                print(Inst_table)
+                Inst_table.create()   
+                db.session.commit()
+                #logic for updating money in user table
+                users = User.query.all()
+                json_ready = [user.read() for user in users]
+                list2 = [item for item in json_ready if item.get('uid') == uid]
+                currentmoney = list2[0]['stockmoney']
+                newmoney = currentmoney + transactionamount
+                user_ids = User.query.filter(User._uid == uid).value(User.id)
+                tableid_user = User.query.get(user_ids)
+                print(tableid_user)
+                tableid_user.stockmoney = newmoney
+                db.session.commit()
+                ### update quantity in stock table
+                tableid = list1[0]['quantity']
+                print(tableid)
+                newquantity = tableid + quantity
+                tableid = list1[0]['id']
+                tableid = Stocks.query.get(tableid)
+                tableid.update(quantity=newquantity )
+                db.session.commit()
+                 # Call the _Graph class to generate and save the graph
+                return {'message': 'Stock sold successfully'}, 200
+            else:
+                return {'message': 'Insufficient stock quantity to sell'}, 400
+    class _Graph1(Resource):
+        def post(self):
+            body = request.get_json()
+            uid= body.get('uid')
+            user_transactions = Stock_Transactions.query.filter_by(_uid=uid).all()
+            # Generate user's money over transactions data
+            user_money_over_transactions = [10000]  # Starting money for each user
+            for transaction in user_transactions:
+                user_money_over_transactions.append(user_money_over_transactions[-1] + transaction._transaction_amount)
+            # Generate and save the line graph
+            plt.plot(user_money_over_transactions)
+            plt.title(f"User's Money Over Transactions (UID: {uid})")
+            plt.xlabel("Transaction Number")
+            plt.ylabel("User's Money")
+            ##plt.savefig(f"user_money_graph_{uid}.png")  # Save the graph as an image file
+            plt.grid(True)
+            plt.tight_layout()
+                # Save it to a BytesIO object
+            buf = BytesIO()
+            plt.savefig(buf, format='png')
+            buf.seek(0)
+            # Convert plot to a base64 string
+            image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+            buf.close()
+            print(image_base64)
+            return jsonify({'image': image_base64})
+        
+    class _Graph(Resource):
+        def post(self):
+            body = request.get_json()
+            uid = body.get('uid')
+            user_transactions = Stock_Transactions.query.filter_by(_uid=uid).all()
+            print("this is user transaction:")
+            print(user_transactions)
+
+            user_money_over_transactions = [10000]  # Starting money for each user
+
+            for transaction in user_transactions:
+                if transaction._transaction_type == 'buy':
+                    user_money_over_transactions.append(user_money_over_transactions[-1] - transaction._transaction_amount)
+                elif transaction._transaction_type == 'sell':
+                    user_money_over_transactions.append(user_money_over_transactions[-1] + transaction._transaction_amount)
+
+            # Debug prints
+            print("User Transactions:", user_transactions)
+            print("Money Over Transactions:", user_money_over_transactions)
+
+            # Generate and save the line graph
+            plt.plot(user_money_over_transactions)
+            plt.title(f"User's Money Over Transactions (UID: {uid})")
+            plt.xlabel("Transaction Number")
+            plt.ylabel("User's Money")
+            plt.grid(True)
+            ##plt.tight_layout()
+
+            # Save it to a BytesIO object
+            buf = BytesIO()
+            plt.savefig(buf, format='png')
+            buf.seek(0)
+
+            # Convert plot to a base64 string
+            image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+            buf.close()
+
+            print(image_base64)
+            return jsonify({'image': image_base64})
+
+
+
+                    
+                
             
                 
         
@@ -296,7 +554,9 @@ class StocksAPI(Resource):
     api.add_resource(_Transactionsdisplayuser, '/transaction/display')
     api.add_resource(_Transaction2, '/transaction')
     api.add_resource(_Stockmoney, '/stockmoney')
-    api.add_resource(_Portfolio, '/portfolio')
+    api.add_resource(_Portfolio2, '/portfolio')
+    api.add_resource(_SellStock, '/sell')
+    api.add_resource(_Graph, '/graph')
 
 
             
